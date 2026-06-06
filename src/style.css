@@ -248,14 +248,26 @@ body::after {
   flex-direction: column;
 }
 .feed-head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
   font-family: "JetBrains Mono", monospace;
   font-size: 10px;
   letter-spacing: 2px;
   color: var(--txt-dim);
   text-transform: uppercase;
   margin-bottom: 8px;
-  padding-right: 6px;
+  padding: 0 6px 0 0;
 }
+.feed-chevron { display: none; transition: transform 0.2s ease; font-size: 11px; }
+.hud-feed.collapsed .feed-list { display: none; }
+.hud-feed.collapsed .feed-head { margin-bottom: 0; }
+.hud-feed.collapsed .feed-chevron { transform: rotate(-90deg); }
 .feed-head span { color: var(--txt); font-size: 13px; }
 .feed-list {
   list-style: none;
@@ -781,10 +793,25 @@ body.is-hard .fi-arrow { display: none; }
 
 /* ---------- responsive ---------- */
 @media (max-width: 720px) {
-  .hud-closest { top: 74px; left: 10px; width: min(44vw, 200px); padding: 10px 12px; }
-  .hud-feed { top: 74px; right: 10px; width: min(44vw, 200px); max-height: 38vh; padding: 10px 6px 10px 12px; }
-  .closest-name { font-size: 16px; }
-  .feed-item { padding: 6px 8px; font-size: 12px; }
+  /* CLOSEST: slim full-width bar at the top so long names fit on one line */
+  .hud-closest {
+    top: 70px; left: 10px; right: 10px; width: auto;
+    padding: 9px 13px;
+  }
+  .closest-label { display: inline; margin-right: 8px; margin-bottom: 0; }
+  .closest-row { display: inline-flex; }
+  .closest-name { font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 60vw; }
+  .proximity-bar { margin: 7px 0 5px; }
+  .closest-dir { font-size: 11px; }
+
+  /* FEED: collapsible panel pinned above the input; full width = names fit */
+  .hud-feed {
+    top: auto; bottom: 120px; left: 10px; right: 10px; width: auto;
+    max-height: 42vh; padding: 10px 8px 10px 14px;
+  }
+  .feed-chevron { display: inline; }
+  .feed-item { padding: 7px 10px; font-size: 13px; }
+  .feed-item .fi-name { overflow-wrap: normal; }
   .brand-sub { display: none; }
   .brand-name { font-size: 15px; letter-spacing: 3px; }
   .hud-top { left: 10px; right: 10px; padding: 9px 11px; }
@@ -814,6 +841,6 @@ body.is-hard .fi-arrow { display: none; }
 /* very small / readout declutter */
 @media (max-width: 460px) {
   .game-readout { display: none; }      /* free up header space; mode is obvious in-game */
-  .hud-closest, .hud-feed { top: 70px; }
+  .hud-closest { top: 66px; }           /* feed stays bottom-anchored (set above) */
   .menu-title { font-size: 26px; letter-spacing: 3px; }
 }

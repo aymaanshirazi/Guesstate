@@ -27,7 +27,7 @@ const ui = {
   suggest: el("suggest"), suggestName: el("suggestName"), suggestYes: el("suggestYes"), suggestNo: el("suggestNo"),
   closestPanel: el("closestPanel"), closestName: el("closestName"), closestKm: el("closestKm"),
   closestDir: el("closestDir"), proximityFill: el("proximityFill"),
-  feedPanel: el("feedPanel"), feedList: el("feedList"), guessCount: el("guessCount"),
+  feedPanel: el("feedPanel"), feedList: el("feedList"), guessCount: el("guessCount"), feedHead: el("feedHead"),
   topBar: el("topBar"), inputBar: el("inputBar"), gameReadout: el("gameReadout"),
   coffeeBtn: el("coffeeBtn"), menuBtn: el("menuBtn"),
   winOverlay: el("winOverlay"), winTitle: el("winTitle"), winBurst: el("winBurst"),
@@ -240,6 +240,8 @@ function newGame() {
   ui.hintBox.hidden = true;
   ui.feedList.innerHTML = "";
   ui.guessCount.textContent = "0";
+  // on phones, start the feed collapsed so the globe stays visible
+  ui.feedPanel.classList.toggle("collapsed", window.innerWidth <= 720);
   ui.feedPanel.hidden = true;
   ui.closestPanel.hidden = true;
   ui.suggest.hidden = true;
@@ -535,6 +537,7 @@ ui.winMenu.addEventListener("click", showMenu);
 ui.menuBtn.addEventListener("click", showMenu);
 ui.dailyBtn.addEventListener("click", startDaily);
 ui.winShare.addEventListener("click", shareResult);
+ui.feedHead.addEventListener("click", () => ui.feedPanel.classList.toggle("collapsed"));
 
 // menu choices
 ui.modeChoice.addEventListener("click", (e) => {
