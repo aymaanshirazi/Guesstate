@@ -1,6 +1,6 @@
-# Nearth — how near can you guess? 🌍
+# Questate — a globe-guessing quest 🌍
 
-A clean, futuristic geography-guessing game (near + earth). A secret place is
+A clean, futuristic geography-guessing game. A secret place is
 hidden on the globe; you type guesses and each one lights up on an interactive
 3D globe, colored by how close it is (cold blue → hot red) with the exact
 distance in km. Keep guessing until you land on it.
@@ -13,9 +13,9 @@ resets mid-game. Inspired by *Globle*, with a GitHub-style globe.
 Cities mode is a one-time **$2.99** unlock, sold via Ko-fi Shop. The gate is in
 `src/config.js`:
 - `KOFI_URL` / `KOFI_SHOP_URL` — your Ko-fi page + shop item link
-- `VALID_PRO_CODES` — unlock codes you hand to buyers. **`TEST-NEARTH`** is your
+- `VALID_PRO_CODES` — unlock codes you hand to buyers. **`TEST-QUESTATE`** is your
   testing bypass; enter it in the unlock modal to unlock without paying.
-- Unlock is remembered in `localStorage` (`nearth_pro_v1`). Note: client-side
+- Unlock is remembered in `localStorage` (`questate_pro_v1`). Note: client-side
   only, so it's convenient but not piracy-proof — fine for a low-price unlock.
 
 ## Play
@@ -45,9 +45,12 @@ npm run preview  # preview the production build locally
 - **Funny hints** — a 💡 button reveals progressive, light-hearted hints (vague →
   specific), ending with the first letter as a last resort.
 - **Give up** — 🏳️ reveals the answer on the globe with a cheeky message.
-- **Countries / Cities modes** — toggle in the header. Cities mode guesses major
-  cities (USA, Canada, UK, Spain, France, Germany) shown as proximity-coloured
-  pins. Add more in `src/cities.js`.
+- **Countries / Cities modes** — chosen in the start menu. Cities mode guesses
+  major cities within ONE chosen country (USA, Canada, UK, Spain, France,
+  Germany). Add more in `src/cities.js`.
+- **Daily Challenge** — one seeded country, the same for everyone each day, with
+  a Wordle-style shareable emoji result grid. Set `SITE_URL` in `src/config.js`
+  to include your link in the share text.
 
 ## Project layout
 - `index.html` — markup / HUD

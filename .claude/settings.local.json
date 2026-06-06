@@ -9,7 +9,10 @@
       "Bash(node -e \"const g=require\\('./public/countries.geojson'\\); const f=g.features.find\\(x=>x.properties.ADMIN==='Canada'\\); console.log\\(JSON.stringify\\(Object.keys\\(f.properties\\)\\)\\); console.log\\('---'\\); const p=f.properties; console.log\\(JSON.stringify\\({CONTINENT:p.CONTINENT,SUBREGION:p.SUBREGION,REGION_UN:p.REGION_UN,POP_EST:p.POP_EST,ECONOMY:p.ECONOMY,INCOME_GRP:p.INCOME_GRP,CONTINENT2:p.REGION_WB}\\)\\)\")",
       "Bash(node -e \"const g=require\\('./public/countries.geojson'\\); g.features.filter\\(f=>/israel|palestin|gaza|west bank/i.test\\(JSON.stringify\\(f.properties.ADMIN||''\\)+ \\(f.properties.NAME||''\\)\\)\\).forEach\\(f=>console.log\\(JSON.stringify\\({ADMIN:f.properties.ADMIN, NAME:f.properties.NAME, ISO_A2:f.properties.ISO_A2, type:f.geometry.type}\\)\\)\\)\")",
       "Bash(gh --version)",
-      "Bash(git config *)"
+      "Bash(git config *)",
+      "WebSearch",
+      "Bash(git add *)",
+      "Bash(git commit -q -m 'Rename Nearth -> Questate across app, config, codes, and docs *)"
     ]
   }
 }

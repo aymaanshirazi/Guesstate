@@ -1,4 +1,4 @@
-# Netlify build settings for Nearth (Vite static site)
+# Netlify build settings for Questate (Vite static site)
 [build]
   command = "npm run build"
   publish = "dist"
