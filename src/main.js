@@ -32,7 +32,7 @@ const ui = {
   coffeeBtn: el("coffeeBtn"), menuBtn: el("menuBtn"),
   winOverlay: el("winOverlay"), winTitle: el("winTitle"), winBurst: el("winBurst"),
   winCountry: el("winCountry"), winStats: el("winStats"), winAgain: el("winAgain"),
-  winMenu: el("winMenu"), winShare: el("winShare"), dailyBtn: el("dailyBtn"),
+  winMenu: el("winMenu"), winShare: el("winShare"), winSupport: el("winSupport"), dailyBtn: el("dailyBtn"),
   hintBtn: el("hintBtn"), forfeitBtn: el("forfeitBtn"),
   hintBox: el("hintBox"), hintTag: el("hintTag"), hintText: el("hintText"),
   // menu
@@ -631,6 +631,7 @@ function buildCountrySet(country) {
 async function boot() {
   ui.coffeeBtn.href = KOFI_URL;
   ui.menuCoffee.href = KOFI_URL;
+  ui.winSupport.href = KOFI_URL;
   ui.unlockBuy.href = KOFI_SHOP_URL;
   ui.proPrice.textContent = PRO_PRICE;
 

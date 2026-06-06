@@ -503,6 +503,17 @@ body.is-hard .fi-arrow { display: none; }
   cursor: pointer;
 }
 .win-menu:hover { background: rgba(77, 124, 255, 0.18); }
+.win-support {
+  display: inline-block;
+  margin-top: 16px;
+  color: var(--warn);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  opacity: 0.9;
+  transition: opacity 0.2s;
+}
+.win-support:hover { opacity: 1; text-decoration: underline; }
 
 /* ---------- in-game readout ---------- */
 .game-readout {
@@ -793,9 +804,12 @@ body.is-hard .fi-arrow { display: none; }
 
 /* ---------- responsive ---------- */
 @media (max-width: 720px) {
+  /* declutter the in-game header on phones (coffee lives in the menu + win screen) */
+  #coffeeBtn { display: none; }
+
   /* CLOSEST: slim full-width bar at the top so long names fit on one line */
   .hud-closest {
-    top: 70px; left: 10px; right: 10px; width: auto;
+    top: 84px; left: 10px; right: 10px; width: auto;
     padding: 9px 13px;
   }
   .closest-label { display: inline; margin-right: 8px; margin-bottom: 0; }
@@ -841,6 +855,5 @@ body.is-hard .fi-arrow { display: none; }
 /* very small / readout declutter */
 @media (max-width: 460px) {
   .game-readout { display: none; }      /* free up header space; mode is obvious in-game */
-  .hud-closest { top: 66px; }           /* feed stays bottom-anchored (set above) */
   .menu-title { font-size: 26px; letter-spacing: 3px; }
 }
