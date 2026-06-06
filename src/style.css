@@ -804,9 +804,6 @@ body.is-hard .fi-arrow { display: none; }
 
 /* ---------- responsive ---------- */
 @media (max-width: 720px) {
-  /* declutter the in-game header on phones (coffee lives in the menu + win screen) */
-  #coffeeBtn { display: none; }
-
   /* CLOSEST: slim full-width bar at the top so long names fit on one line */
   .hud-closest {
     top: 84px; left: 10px; right: 10px; width: auto;
@@ -818,10 +815,11 @@ body.is-hard .fi-arrow { display: none; }
   .proximity-bar { margin: 7px 0 5px; }
   .closest-dir { font-size: 11px; }
 
-  /* FEED: collapsible panel pinned above the input; full width = names fit */
+  /* FEED: collapsible panel directly under the CLOSEST bar (never hidden behind
+     the input/keyboard); full width so names fit on one line */
   .hud-feed {
-    top: auto; bottom: 120px; left: 10px; right: 10px; width: auto;
-    max-height: 42vh; padding: 10px 8px 10px 14px;
+    top: 170px; bottom: auto; left: 10px; right: 10px; width: auto;
+    max-height: 36vh; padding: 10px 8px 10px 14px;
   }
   .feed-chevron { display: inline; }
   .feed-item { padding: 7px 10px; font-size: 13px; }

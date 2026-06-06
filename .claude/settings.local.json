@@ -21,7 +21,8 @@
       "Bash(git commit -q -m 'UI polish: design tokens, focus rings, glass highlights on panels/cards *)",
       "Bash(git commit -q -m 'Enable Cloudflare Web Analytics *)",
       "Bash(git commit -q -m 'Mobile layout: full-width CLOSEST bar + collapsible bottom feed so globe stays visible; long names fit one line *)",
-      "Bash(git commit -q -m 'Fix in-game header overlap; declutter coffee on mobile \\(move to win screen + menu\\) *)"
+      "Bash(git commit -q -m 'Fix in-game header overlap; declutter coffee on mobile \\(move to win screen + menu\\) *)",
+      "Bash(git commit -q -m 'Restore in-game coffee button; anchor guesses feed under CLOSEST bar \\(visible, not hidden behind input\\) *)"
     ]
   }
 }
