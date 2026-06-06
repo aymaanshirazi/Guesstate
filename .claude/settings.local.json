@@ -18,7 +18,8 @@
       "Bash(git branch *)",
       "Bash(git push *)",
       "Bash(git commit -q -m 'Mobile fixes: bulletproof globe sizing, no horizontal scroll, responsive panels, no km clipping, compact footer *)",
-      "Bash(git commit -q -m 'UI polish: design tokens, focus rings, glass highlights on panels/cards *)"
+      "Bash(git commit -q -m 'UI polish: design tokens, focus rings, glass highlights on panels/cards *)",
+      "Bash(git commit -q -m 'Enable Cloudflare Web Analytics *)"
     ]
   }
 }
