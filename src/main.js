@@ -702,7 +702,15 @@ async function boot() {
 
   const resize = () => globe.width(window.innerWidth).height(window.innerHeight);
   window.addEventListener("resize", resize);
+  window.addEventListener("orientationchange", () => setTimeout(resize, 150));
+  window.addEventListener("load", resize);
+  // mobile: URL-bar show/hide and keyboard open/close fire here, not always "resize"
+  window.visualViewport?.addEventListener("resize", resize);
   resize();
+  // re-fit after first layout settles (fixes dead-space on high-DPI phones)
+  requestAnimationFrame(resize);
+  setTimeout(resize, 250);
+  setTimeout(resize, 800);
 
   setInterval(() => globe.arcsData(makeDecoArcs(20)), 10000);
 

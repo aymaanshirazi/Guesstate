@@ -19,17 +19,30 @@
 
 html, body {
   height: 100%;
+  width: 100%;
   background: radial-gradient(120% 120% at 50% -10%, #11183a 0%, var(--bg-2) 38%, var(--bg) 100%);
   color: var(--txt);
   font-family: "Space Grotesk", system-ui, sans-serif;
   overflow: hidden;
+  overflow-x: hidden;
+  overscroll-behavior: none;
   -webkit-font-smoothing: antialiased;
 }
 
 #globe {
   position: fixed;
   inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
   z-index: 0;
+}
+/* safety net: keep the canvas filling the viewport even if the JS resize lags
+   (prevents the dead-space / off-center bug on high-DPI phones) */
+#globe canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
 }
 
 /* subtle vignette + grain over the globe */
@@ -178,7 +191,7 @@ body::after {
   justify-content: space-between;
   gap: 8px;
 }
-.closest-name { font-size: 18px; font-weight: 600; }
+.closest-name { font-size: 18px; font-weight: 600; overflow-wrap: anywhere; min-width: 0; }
 .closest-km {
   font-family: "JetBrains Mono", monospace;
   font-size: 13px;
@@ -248,7 +261,7 @@ body::after {
   font-size: 13px;
   animation: slideIn 0.35s ease both;
 }
-.feed-item .fi-name { font-weight: 500; display: flex; align-items: center; gap: 7px; }
+.feed-item .fi-name { font-weight: 500; display: flex; align-items: center; gap: 7px; flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
 .feed-item .fi-sub { color: var(--txt-dim); font-size: 11px; font-weight: 400; }
 .feed-item .fi-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; box-shadow: 0 0 8px currentColor; }
 .feed-item .fi-right { display: flex; align-items: center; gap: 7px; flex: none; }
@@ -751,11 +764,13 @@ body.is-hard .fi-arrow { display: none; }
 
 /* ---------- responsive ---------- */
 @media (max-width: 720px) {
-  .hud-closest { top: 80px; left: 12px; width: 160px; padding: 11px 12px; }
-  .hud-feed { top: 80px; right: 12px; width: 150px; max-height: 40vh; }
+  .hud-closest { top: 74px; left: 10px; width: min(44vw, 200px); padding: 10px 12px; }
+  .hud-feed { top: 74px; right: 10px; width: min(44vw, 200px); max-height: 38vh; padding: 10px 6px 10px 12px; }
+  .closest-name { font-size: 16px; }
+  .feed-item { padding: 6px 8px; font-size: 12px; }
   .brand-sub { display: none; }
   .brand-name { font-size: 15px; letter-spacing: 3px; }
-  .hud-top { left: 12px; right: 12px; padding: 10px 12px; }
+  .hud-top { left: 10px; right: 10px; padding: 9px 11px; }
   .mode-btn { padding: 6px 10px; }
   .hud-top-right { gap: 8px; }
   .hud-top-left { gap: 10px; }
@@ -763,4 +778,25 @@ body.is-hard .fi-arrow { display: none; }
   .coffee { padding: 8px 10px; }
   .type-btn .tl { display: none; }
   .type-btn { padding: 7px 11px; }
+
+  /* compact bottom area so the keyboard doesn't bury it */
+  .hud-input { bottom: 12px; left: 10px; right: 10px; transform: none; width: auto; padding: 10px; }
+  #guessInput { font-size: 16px; padding: 9px 0; } /* 16px avoids iOS/Android zoom-on-focus */
+  .submit-btn { padding: 11px 16px; }
+  .actions { margin-top: 8px; gap: 8px; }
+  .ghost-btn { padding: 8px 14px; font-size: 12px; }
+
+  /* menu fits + centers cleanly on phones */
+  .menu-overlay { padding: 14px; }
+  .menu-card { padding: 22px 18px 18px; }
+  .menu-title { font-size: 30px; letter-spacing: 5px; }
+  .menu-mark { font-size: 24px; }
+  .choice { padding: 12px 8px; font-size: 13px; }
+}
+
+/* very small / readout declutter */
+@media (max-width: 460px) {
+  .game-readout { display: none; }      /* free up header space; mode is obvious in-game */
+  .hud-closest, .hud-feed { top: 70px; }
+  .menu-title { font-size: 26px; letter-spacing: 3px; }
 }

@@ -13,7 +13,11 @@
       "WebSearch",
       "Bash(git add *)",
       "Bash(git commit -q -m 'Rename Nearth -> Questate across app, config, codes, and docs *)",
-      "Bash(git commit -q -m 'Rename Questate -> Guesstate; set SITE_URL to guesstate.com; new unlock code *)"
+      "Bash(git commit -q -m 'Rename Questate -> Guesstate; set SITE_URL to guesstate.com; new unlock code *)",
+      "Bash(git remote *)",
+      "Bash(git branch *)",
+      "Bash(git push *)",
+      "Bash(git commit -q -m 'Mobile fixes: bulletproof globe sizing, no horizontal scroll, responsive panels, no km clipping, compact footer *)"
     ]
   }
 }
