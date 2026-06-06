@@ -1,0 +1,9 @@
+node_modules
+dist
+.vite
+*.local
+.DS_Store
+Thumbs.db
+
+# Ko-fi delivery asset (contains the buyer unlock code) — keep out of the repo
+kofi/

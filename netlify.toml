@@ -1,0 +1,10 @@
+# Netlify build settings for Nearth (Vite static site)
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# Long-cache hashed assets; always revalidate the HTML entry.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

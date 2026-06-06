@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Nearth · how near can you guess?</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <div id="globe"></div>
+
+    <!-- Top bar (in-game) -->
+    <header class="hud hud-top" id="topBar" hidden>
+      <div class="brand">
+        <span class="brand-mark">◷</span>
+        <span class="brand-name">NEARTH</span>
+      </div>
+      <div class="hud-top-right">
+        <span class="game-readout" id="gameReadout"></span>
+        <a class="coffee" id="coffeeBtn" href="#" target="_blank" rel="noopener noreferrer" title="Support Nearth">
+          <span class="coffee-emoji">☕</span>
+          <span class="coffee-text">Coffee</span>
+        </a>
+        <button class="icon-btn" id="menuBtn" title="Main menu">≡</button>
+      </div>
+    </header>
+
+    <!-- Best / closest readout -->
+    <div class="hud hud-closest" id="closestPanel" hidden>
+      <div class="closest-label">CLOSEST</div>
+      <div class="closest-row">
+        <span class="closest-name" id="closestName">—</span>
+        <span class="closest-km" id="closestKm">—</span>
+      </div>
+      <div class="proximity-bar"><div class="proximity-fill" id="proximityFill"></div></div>
+      <div class="closest-dir" id="closestDir"></div>
+    </div>
+
+    <!-- Guess feed -->
+    <aside class="hud hud-feed" id="feedPanel" hidden>
+      <div class="feed-head"><span id="guessCount">0</span> guesses</div>
+      <ul class="feed-list" id="feedList"></ul>
+    </aside>
+
+    <!-- Bottom input -->
+    <footer class="hud hud-input" id="inputBar" hidden>
+      <form id="guessForm" autocomplete="off">
+        <div class="input-wrap">
+          <span class="input-icon">⌖</span>
+          <input id="guessInput" type="text" placeholder="Type a country and press Enter…" spellcheck="false" autocapitalize="words" />
+          <button type="submit" class="submit-btn" id="submitBtn">GUESS</button>
+        </div>
+      </form>
+      <div class="actions">
+        <button type="button" class="ghost-btn" id="hintBtn">💡 Hint</button>
+        <button type="button" class="ghost-btn danger" id="forfeitBtn">🏳️ Give up</button>
+      </div>
+      <div class="hintbox" id="hintBox" hidden>
+        <span class="hintbox-tag" id="hintTag">HINT 1</span>
+        <span class="hintbox-text" id="hintText"></span>
+      </div>
+      <div class="hint" id="hint"></div>
+      <div class="suggest" id="suggest" hidden>
+        <span class="suggest-text">Did you mean <b id="suggestName"></b>?</span>
+        <button class="suggest-yes" id="suggestYes">Yes</button>
+        <button class="suggest-no" id="suggestNo">No</button>
+      </div>
+    </footer>
+
+    <!-- ============ MAIN MENU ============ -->
+    <div class="menu-overlay" id="menu">
+      <div class="menu-card">
+        <div class="menu-brand">
+          <span class="menu-mark">◷</span>
+          <h1 class="menu-title">NEARTH</h1>
+        </div>
+        <p class="menu-tagline">A secret place is hidden on the globe. How <b>near</b> can you guess?</p>
+
+        <button class="daily-btn" id="dailyBtn">
+          <span class="daily-emoji">🗓️</span>
+          <span class="daily-text">
+            <span class="daily-main">DAILY CHALLENGE</span>
+            <span class="daily-sub" id="dailySub">one shared puzzle, same for everyone</span>
+          </span>
+          <span class="daily-go">▶</span>
+        </button>
+        <div class="menu-divider"><span>or free play</span></div>
+
+        <div class="menu-section">
+          <div class="menu-label">What do you want to guess?</div>
+          <div class="choice-row" id="modeChoice">
+            <button class="choice is-active" data-mode="countries"><span class="choice-emoji">🌐</span> Countries</button>
+            <button class="choice locked" data-mode="cities"><span class="choice-emoji">📍</span> Cities <span class="pro-badge" id="citiesProBadge">🔒 PRO</span></button>
+          </div>
+        </div>
+
+        <div class="menu-section" id="countrySection" hidden>
+          <div class="menu-label">Which country's cities?</div>
+          <div class="choice-grid" id="countryChoice"></div>
+        </div>
+
+        <div class="menu-section">
+          <div class="menu-label">Difficulty</div>
+          <div class="choice-row" id="diffChoice">
+            <button class="choice is-active" data-diff="easy">😌 Easy <span class="choice-hint">shows direction</span></button>
+            <button class="choice" data-diff="hard">😤 Hard <span class="choice-hint">no direction</span></button>
+          </div>
+        </div>
+
+        <button class="play-btn" id="playBtn">▶ PLAY</button>
+
+        <div class="menu-foot">
+          <a id="menuCoffee" href="#" target="_blank" rel="noopener noreferrer">☕ Support Nearth</a>
+          <span id="proStatus"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ UNLOCK MODAL ============ -->
+    <div class="unlock-overlay" id="unlock" hidden>
+      <div class="unlock-card">
+        <button class="unlock-close" id="unlockClose">✕</button>
+        <div class="unlock-icon">🔓</div>
+        <h2 class="unlock-title">Unlock Cities Mode</h2>
+        <p class="unlock-price"><b id="proPrice">$2.99</b> · one-time</p>
+        <p class="unlock-desc">
+          Guess cities within any country, with proximity pins and smart hints.
+          Buy once on Ko-fi and you'll receive an unlock code.
+        </p>
+        <a class="unlock-buy" id="unlockBuy" href="#" target="_blank" rel="noopener noreferrer">Get it on Ko-fi →</a>
+        <div class="unlock-or">have a code?</div>
+        <form class="unlock-form" id="unlockForm">
+          <input id="codeInput" type="text" placeholder="Enter unlock code" spellcheck="false" autocapitalize="characters" />
+          <button type="submit" class="unlock-go">Unlock</button>
+        </form>
+        <div class="unlock-msg" id="unlockMsg"></div>
+      </div>
+    </div>
+
+    <!-- Win / reveal overlay -->
+    <div class="win-overlay" id="winOverlay" hidden>
+      <div class="win-card">
+        <div class="win-burst" id="winBurst">◉</div>
+        <h2 class="win-title" id="winTitle">SOLVED</h2>
+        <p class="win-country" id="winCountry">—</p>
+        <p class="win-stats" id="winStats">—</p>
+        <div class="win-btns">
+          <button class="win-share" id="winShare" hidden>📋 Share result</button>
+          <button class="win-again" id="winAgain">Play again</button>
+          <button class="win-menu" id="winMenu">Menu</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="loading" id="loading"><div class="spinner"></div><span>Building the world…</span></div>
+
+    <script type="module" src="/src/main.js"></script>
+
+    <!--
+      Cloudflare Web Analytics (free traffic stats).
+      1. Sign up at dash.cloudflare.com -> Analytics & Logs -> Web Analytics -> "Add a site"
+      2. Enter your site's hostname (your Netlify URL or custom domain)
+      3. Paste the token below and DELETE these comment markers to activate.
+    -->
+    <!--
+    <script defer src="https://static.cloudflareinsights.com/beacon.min.js"
+      data-cf-beacon='{"token": "YOUR_CLOUDFLARE_TOKEN"}'></script>
+    -->
+  </body>
+</html>
