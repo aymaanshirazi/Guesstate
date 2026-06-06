@@ -159,6 +159,19 @@
       </div>
     </div>
 
+    <!-- Confirm leaving a game in progress -->
+    <div class="confirm-overlay" id="confirmLeave" hidden>
+      <div class="confirm-card">
+        <div class="confirm-icon">🚪</div>
+        <h2 class="confirm-title">Leave this game?</h2>
+        <p class="confirm-desc">Your current progress will be lost.</p>
+        <div class="confirm-btns">
+          <button class="confirm-stay" id="confirmStay">Keep playing</button>
+          <button class="confirm-leave" id="confirmLeaveBtn">Leave</button>
+        </div>
+      </div>
+    </div>
+
     <div class="loading" id="loading"><div class="spinner"></div><span>Building the world…</span></div>
 
     <script type="module" src="/src/main.js"></script>

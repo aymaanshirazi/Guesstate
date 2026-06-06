@@ -39,6 +39,8 @@ const ui = {
   menu: el("menu"), modeChoice: el("modeChoice"), citiesProBadge: el("citiesProBadge"),
   countrySection: el("countrySection"), countryChoice: el("countryChoice"),
   diffChoice: el("diffChoice"), playBtn: el("playBtn"), menuCoffee: el("menuCoffee"), proStatus: el("proStatus"),
+  // confirm leave
+  confirmLeave: el("confirmLeave"), confirmStay: el("confirmStay"), confirmLeaveBtn: el("confirmLeaveBtn"),
   // unlock
   unlock: el("unlock"), unlockClose: el("unlockClose"), proPrice: el("proPrice"),
   unlockBuy: el("unlockBuy"), unlockForm: el("unlockForm"), codeInput: el("codeInput"), unlockMsg: el("unlockMsg"),
@@ -273,6 +275,7 @@ function showMenu() {
   ui.closestPanel.hidden = true;
   ui.feedPanel.hidden = true;
   ui.winOverlay.hidden = true;
+  ui.confirmLeave.hidden = true;
   refreshMenuLocks();
   applyMenuSelectionUI();
   ui.menu.hidden = false;
@@ -539,7 +542,14 @@ ui.hintBtn.addEventListener("click", revealHint);
 ui.forfeitBtn.addEventListener("click", forfeit);
 ui.winAgain.addEventListener("click", newGame);
 ui.winMenu.addEventListener("click", showMenu);
-ui.menuBtn.addEventListener("click", showMenu);
+// confirm before leaving a game that's in progress
+ui.menuBtn.addEventListener("click", () => {
+  if (!state.solved && state.guessed.size > 0) ui.confirmLeave.hidden = false;
+  else showMenu();
+});
+ui.confirmStay.addEventListener("click", () => { ui.confirmLeave.hidden = true; });
+ui.confirmLeave.addEventListener("click", (e) => { if (e.target === ui.confirmLeave) ui.confirmLeave.hidden = true; });
+ui.confirmLeaveBtn.addEventListener("click", () => { ui.confirmLeave.hidden = true; showMenu(); });
 ui.dailyBtn.addEventListener("click", startDaily);
 ui.winShare.addEventListener("click", shareResult);
 ui.feedHead.addEventListener("click", () => ui.feedPanel.classList.toggle("collapsed"));
@@ -733,6 +743,18 @@ async function boot() {
   requestAnimationFrame(resize);
   setTimeout(resize, 250);
   setTimeout(resize, 800);
+
+  // iOS Safari: the on-screen keyboard covers fixed-bottom elements. Lift the
+  // input bar above the keyboard using the visual viewport so it stays visible.
+  const vv = window.visualViewport;
+  if (vv) {
+    const positionInput = () => {
+      const inset = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+      ui.inputBar.style.transform = inset > 1 ? `translateY(${-inset}px)` : "";
+    };
+    vv.addEventListener("resize", positionInput);
+    vv.addEventListener("scroll", positionInput);
+  }
 
   setInterval(() => globe.arcsData(makeDecoArcs(20)), 10000);
 

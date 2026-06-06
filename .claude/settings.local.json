@@ -26,7 +26,8 @@
       "PowerShell($tmp = \"$env:TEMP\\\\geonames\"; New-Item -ItemType Directory -Force $tmp | Out-Null; Invoke-WebRequest \"https://download.geonames.org/export/dump/cities15000.zip\" -OutFile \"$tmp\\\\c.zip\"; Expand-Archive \"$tmp\\\\c.zip\" -DestinationPath $tmp -Force; $f = \"$tmp\\\\cities15000.txt\"; \"Total lines: \" + \\(Get-Content $f | Measure-Object -Line\\).Lines; \"Size MB: \" + [math]::Round\\(\\(Get-Item $f\\).Length/1MB,2\\))",
       "PowerShell(cd \"C:\\\\Users\\\\aymaa\\\\OneDrive\\\\Documents\\\\Desktop\\\\B - Game 2\"; node scripts/gen-cities.mjs \"$env:TEMP\\\\geonames\\\\cities15000.txt\")",
       "Bash(node -e ' *)",
-      "Bash(git commit -q -m 'Cities mode: recognize ~1000 real cities per country \\(GeoNames\\), keep answers to well-known cities; add attribution *)"
+      "Bash(git commit -q -m 'Cities mode: recognize ~1000 real cities per country \\(GeoNames\\), keep answers to well-known cities; add attribution *)",
+      "Bash(git commit -q -m 'iOS: lift input above keyboard via visualViewport; confirm before leaving a game in progress *)"
     ]
   }
 }
