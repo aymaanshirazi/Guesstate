@@ -8,7 +8,7 @@ import { buildHints, buildCityHints } from "./hints.js";
 import { KOFI_URL, KOFI_SHOP_URL, PRO_PRICE, VALID_PRO_CODES, PRO_STORAGE_KEY, SITE_URL } from "./config.js";
 
 /* ------------------------------------------------------------------ *
- *  QUESTATE — a globe-guessing quest
+ *  GUESSTATE — guess the place on the globe
  * ------------------------------------------------------------------ */
 
 const MAX_REF_KM = 13000;        // distance that maps to "ice cold" (countries)
@@ -375,7 +375,7 @@ function buildShareText() {
   const line = state.solved && state.guessed.has(state.target.name)
     ? `Solved in ${n}${hard}`
     : `Gave up after ${n}${hard}`;
-  let txt = `🌍 Questate Daily #${state.dailyNumber}\n${line}\n${squares}`;
+  let txt = `🌍 Guesstate Daily #${state.dailyNumber}\n${line}\n${squares}`;
   if (SITE_URL) txt += `\n${SITE_URL}`;
   return txt;
 }

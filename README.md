@@ -1,4 +1,4 @@
-# Questate — a globe-guessing quest 🌍
+# Guesstate — guess the place on the globe 🌍
 
 A clean, futuristic geography-guessing game. A secret place is
 hidden on the globe; you type guesses and each one lights up on an interactive
@@ -13,9 +13,9 @@ resets mid-game. Inspired by *Globle*, with a GitHub-style globe.
 Cities mode is a one-time **$2.99** unlock, sold via Ko-fi Shop. The gate is in
 `src/config.js`:
 - `KOFI_URL` / `KOFI_SHOP_URL` — your Ko-fi page + shop item link
-- `VALID_PRO_CODES` — unlock codes you hand to buyers. **`TEST-QUESTATE`** is your
+- `VALID_PRO_CODES` — unlock codes you hand to buyers. **`TEST-GUESSTATE`** is your
   testing bypass; enter it in the unlock modal to unlock without paying.
-- Unlock is remembered in `localStorage` (`questate_pro_v1`). Note: client-side
+- Unlock is remembered in `localStorage` (`guesstate_pro_v1`). Note: client-side
   only, so it's convenient but not piracy-proof — fine for a low-price unlock.
 
 ## Play
