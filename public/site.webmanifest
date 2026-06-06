@@ -1,0 +1,12 @@
+{
+  "name": "Guesstate",
+  "short_name": "Guesstate",
+  "description": "A free daily geography guessing game on a 3D globe.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#05060c",
+  "theme_color": "#05060c",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

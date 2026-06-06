@@ -27,7 +27,11 @@
       "PowerShell(cd \"C:\\\\Users\\\\aymaa\\\\OneDrive\\\\Documents\\\\Desktop\\\\B - Game 2\"; node scripts/gen-cities.mjs \"$env:TEMP\\\\geonames\\\\cities15000.txt\")",
       "Bash(node -e ' *)",
       "Bash(git commit -q -m 'Cities mode: recognize ~1000 real cities per country \\(GeoNames\\), keep answers to well-known cities; add attribution *)",
-      "Bash(git commit -q -m 'iOS: lift input above keyboard via visualViewport; confirm before leaving a game in progress *)"
+      "Bash(git commit -q -m 'iOS: lift input above keyboard via visualViewport; confirm before leaving a game in progress *)",
+      "Bash(npm i *)",
+      "Bash(node -e \"const sharp=require\\('sharp'\\);const fs=require\\('fs'\\);sharp\\('scripts/og.svg',{density:200}\\).resize\\(1200,630\\).png\\(\\).toFile\\('public/og.png'\\).then\\(\\(\\)=>console.log\\('og.png bytes:',fs.statSync\\('public/og.png'\\).size\\)\\).catch\\(e=>{console.error\\('ERR',e.message\\);process.exit\\(1\\)}\\)\")",
+      "Bash(npm un *)",
+      "Bash(git commit -q -m 'SEO: meta description, Open Graph + Twitter cards, JSON-LD, favicon, manifest, robots.txt, sitemap.xml, og.png *)"
     ]
   }
 }

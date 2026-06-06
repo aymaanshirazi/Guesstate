@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="-5%" r="120%">
+      <stop offset="0%" stop-color="#11183a"/>
+      <stop offset="42%" stop-color="#090b18"/>
+      <stop offset="100%" stop-color="#05060c"/>
+    </radialGradient>
+    <radialGradient id="globe" cx="40%" cy="34%" r="75%">
+      <stop offset="0%" stop-color="#1b2a5e"/>
+      <stop offset="100%" stop-color="#0a1024"/>
+    </radialGradient>
+    <linearGradient id="heat" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#2b4dff"/>
+      <stop offset="45%" stop-color="#00e0c6"/>
+      <stop offset="72%" stop-color="#ffcf5c"/>
+      <stop offset="100%" stop-color="#ff3b30"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- globe -->
+  <g transform="translate(905,315)">
+    <circle r="210" fill="url(#globe)" stroke="#4d7cff" stroke-width="3"/>
+    <g fill="none" stroke="#00e0c6" stroke-width="2.5" opacity="0.85">
+      <circle r="210"/>
+      <ellipse rx="210" ry="78"/>
+      <ellipse rx="210" ry="150"/>
+      <ellipse rx="92" ry="210"/>
+      <ellipse rx="168" ry="210"/>
+      <line x1="-210" y1="0" x2="210" y2="0"/>
+    </g>
+    <circle cx="40" cy="-30" r="26" fill="#ff3b30" opacity="0.9"/>
+    <circle cx="-70" cy="60" r="20" fill="#ffcf5c" opacity="0.85"/>
+    <circle cx="-30" cy="-90" r="16" fill="#00e0c6" opacity="0.85"/>
+  </g>
+
+  <!-- text -->
+  <g font-family="'Space Grotesk','Segoe UI',Arial,sans-serif">
+    <text x="90" y="250" font-size="96" font-weight="700" fill="#e8eeff" letter-spacing="6">GUESSTATE</text>
+    <text x="92" y="320" font-size="36" fill="#8a96b8">How <tspan fill="#00e0c6" font-weight="600">near</tspan> can you guess?</text>
+    <text x="92" y="384" font-size="27" fill="#aab4d4">A free daily geography game on a 3D globe.</text>
+    <rect x="92" y="430" width="420" height="12" rx="6" fill="url(#heat)"/>
+    <text x="92" y="478" font-size="20" fill="#8a96b8" letter-spacing="2">COLD &#8594; HOT &#183; GUESS THE SECRET PLACE</text>
+  </g>
+</svg>
