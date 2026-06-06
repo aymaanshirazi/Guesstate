@@ -22,7 +22,11 @@
       "Bash(git commit -q -m 'Enable Cloudflare Web Analytics *)",
       "Bash(git commit -q -m 'Mobile layout: full-width CLOSEST bar + collapsible bottom feed so globe stays visible; long names fit one line *)",
       "Bash(git commit -q -m 'Fix in-game header overlap; declutter coffee on mobile \\(move to win screen + menu\\) *)",
-      "Bash(git commit -q -m 'Restore in-game coffee button; anchor guesses feed under CLOSEST bar \\(visible, not hidden behind input\\) *)"
+      "Bash(git commit -q -m 'Restore in-game coffee button; anchor guesses feed under CLOSEST bar \\(visible, not hidden behind input\\) *)",
+      "PowerShell($tmp = \"$env:TEMP\\\\geonames\"; New-Item -ItemType Directory -Force $tmp | Out-Null; Invoke-WebRequest \"https://download.geonames.org/export/dump/cities15000.zip\" -OutFile \"$tmp\\\\c.zip\"; Expand-Archive \"$tmp\\\\c.zip\" -DestinationPath $tmp -Force; $f = \"$tmp\\\\cities15000.txt\"; \"Total lines: \" + \\(Get-Content $f | Measure-Object -Line\\).Lines; \"Size MB: \" + [math]::Round\\(\\(Get-Item $f\\).Length/1MB,2\\))",
+      "PowerShell(cd \"C:\\\\Users\\\\aymaa\\\\OneDrive\\\\Documents\\\\Desktop\\\\B - Game 2\"; node scripts/gen-cities.mjs \"$env:TEMP\\\\geonames\\\\cities15000.txt\")",
+      "Bash(node -e ' *)",
+      "Bash(git commit -q -m 'Cities mode: recognize ~1000 real cities per country \\(GeoNames\\), keep answers to well-known cities; add attribution *)"
     ]
   }
 }

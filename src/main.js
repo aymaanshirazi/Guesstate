@@ -3,7 +3,7 @@ import { Color, Group, Sprite, SpriteMaterial, CanvasTexture } from "three";
 import { geoCentroid } from "d3-geo";
 import "./style.css";
 import { ALIASES } from "./aliases.js";
-import { CITIES, CITY_ALIASES } from "./cities.js";
+import { CITY_ALIASES } from "./cities.js";
 import { buildHints, buildCityHints } from "./hints.js";
 import { KOFI_URL, KOFI_SHOP_URL, PRO_PRICE, VALID_PRO_CODES, PRO_STORAGE_KEY, SITE_URL } from "./config.js";
 
@@ -51,6 +51,7 @@ const state = {
   gameType: "countries",       // "countries" | "cities"
   cityCountry: null,           // chosen country in cities mode
   pool: [],
+  targetPool: [],
   byNorm: new Map(),
   maxRef: MAX_REF_KM,
   target: null,
@@ -226,9 +227,10 @@ function revealHint() {
 }
 
 function newGame() {
+  const targets = state.targetPool.length ? state.targetPool : state.pool;
   state.target = state.daily && state.dailyTarget
     ? state.dailyTarget
-    : state.pool[Math.floor(Math.random() * state.pool.length)];
+    : targets[Math.floor(Math.random() * targets.length)];
   state.guessed.clear();
   state.solved = false;
   state.pendingSuggestion = null;
@@ -300,7 +302,8 @@ function startGame() {
     const set = state.sets["city:" + menuSel.country];
     state.gameType = "cities";
     state.cityCountry = menuSel.country;
-    state.pool = set.pool;
+    state.pool = set.pool;           // every real city = a valid guess
+    state.targetPool = set.targets;  // but the answer is a well-known city
     state.byNorm = set.byNorm;
     state.maxRef = MAX_REF_KM_CITY;
     ui.input.placeholder = `Type a city in ${menuSel.country} and press Enter…`;
@@ -308,6 +311,7 @@ function startGame() {
     state.gameType = "countries";
     state.cityCountry = null;
     state.pool = state.sets.countries.pool;
+    state.targetPool = state.sets.countries.pool;
     state.byNorm = state.sets.countries.byNorm;
     state.maxRef = MAX_REF_KM;
     ui.input.placeholder = "Type a country and press Enter…";
@@ -352,6 +356,7 @@ function startDaily() {
   state.gameType = "countries";
   state.cityCountry = null;
   state.pool = state.sets.countries.pool;
+  state.targetPool = state.sets.countries.pool;
   state.byNorm = state.sets.countries.byNorm;
   state.maxRef = MAX_REF_KM;
   state.mode = menuSel.diff;
@@ -617,15 +622,25 @@ function addOrbiters() {
 }
 
 /* ---------------- boot ---------------- */
-function buildCountrySet(country) {
-  const pool = CITIES.filter((c) => c.country === country);
+const CITY_TARGET_MIN_POP = 250000; // answers come from "well-known" cities only
+const CITY_TARGET_MIN_COUNT = 15;   // ...but ensure at least this many per country
+
+/* Build a country's city set from the GeoNames-derived list.
+ * pool = every real city (valid guesses); targets = the famous subset (answers). */
+function buildCitySet(country, list) {
+  const pool = list.map((c) => ({ name: c.name, country, lat: c.lat, lng: c.lng }));
   const byNorm = new Map();
   for (const c of pool) byNorm.set(norm(c.name), c);
   for (const [alias, canonical] of Object.entries(CITY_ALIASES)) {
     const c = byNorm.get(norm(canonical));
     if (c) byNorm.set(norm(alias), c);
   }
-  return { pool, byNorm };
+  // famous subset for the answer (list is sorted by population desc)
+  let famous = list.filter((c) => c.pop >= CITY_TARGET_MIN_POP);
+  if (famous.length < CITY_TARGET_MIN_COUNT) famous = list.slice(0, CITY_TARGET_MIN_COUNT);
+  const famousKeys = new Set(famous.map((c) => norm(c.name)));
+  const targets = pool.filter((c) => famousKeys.has(norm(c.name)));
+  return { pool, byNorm, targets };
 }
 
 async function boot() {
@@ -654,9 +669,12 @@ async function boot() {
     if (c) state.sets.countries.byNorm.set(norm(alias), c);
   }
 
-  // per-country city sets
-  state.cityCountries = [...new Set(CITIES.map((c) => c.country))];
-  for (const country of state.cityCountries) state.sets["city:" + country] = buildCountrySet(country);
+  // per-country city sets from the real city database (public/cities.json)
+  const citiesData = await (await fetch("/cities.json")).json();
+  state.cityCountries = Object.keys(citiesData);
+  for (const country of state.cityCountries) {
+    state.sets["city:" + country] = buildCitySet(country, citiesData[country]);
+  }
 
   // populate menu country chooser
   ui.countryChoice.innerHTML = state.cityCountries.map((c) =>

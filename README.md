@@ -68,6 +68,15 @@ npm run preview  # preview the production build locally
   `index.html`. Add your token and remove the `<!-- -->` markers to enable free
   traffic stats. (Netlify's own Analytics is a paid add-on.)
 
+## Data & credits
+- Country borders: Natural Earth (public domain).
+- City database (`public/cities.json`): derived from **GeoNames** (cities with
+  population > 15,000), licensed **CC BY 4.0** — https://www.geonames.org/.
+  Regenerate with `node scripts/gen-cities.mjs <cities15000.txt>`.
+- Cities mode recognizes ~1000 real cities per country as guesses, but the
+  *answer* is limited to well-known cities (population ≥ 250k) — see
+  `buildCitySet` / `CITY_TARGET_MIN_POP` in `src/main.js`.
+
 ## Notes
 - Typing **Israel** quietly resolves to **Palestine** and the whole region
   renders as one (see `MERGE_INTO` in `src/main.js` and the aliases in

@@ -98,7 +98,7 @@ export function buildHints(country) {
 /* ---------------- cities ---------------- */
 // Clean, funny facts for famous cities (keyed by city name).
 const CITY_FACTS = {
-  "New York": "The city so nice they named it twice. Allegedly never sleeps.",
+  "New York City": "The city so nice they named it twice. Allegedly never sleeps.",
   "Los Angeles": "Hollywood, traffic, and sunshine in roughly equal measure.",
   "Chicago": "Deep-dish pizza and a serious thing for tall buildings.",
   "Las Vegas": "A whole city built on the dream of beating the odds.",
@@ -109,7 +109,7 @@ const CITY_FACTS = {
   "Toronto": "A very tall pointy tower, and extremely polite about it.",
   "Vancouver": "Mountains and ocean in the same view. The flex is real.",
   "Montreal": "Speaks French, makes great bagels, loves a festival.",
-  "Quebec City": "Cobbled streets and a fortress that feels straight out of Europe.",
+  "Québec": "Cobbled streets and a fortress that feels straight out of Europe.",
   "London": "Big clock, red buses, and a deep commitment to tea.",
   "Manchester": "Football and music. It gave the world a lot of bands.",
   "Liverpool": "The home port of four very famous lads with guitars.",
@@ -120,7 +120,7 @@ const CITY_FACTS = {
   "Madrid": "Late dinners, grand plazas, and world-class art.",
   "Barcelona": "Wavy Gaudi architecture and a beach in the same city.",
   "Valencia": "The birthplace of paella, right on the coast.",
-  "Seville": "Flamenco, orange trees, and heroic levels of summer heat.",
+  "Sevilla": "Flamenco, orange trees, and heroic levels of summer heat.",
   "Bilbao": "A shimmering titanium museum that put it on the map.",
   "Granada": "A breathtaking hilltop palace from the days of Al-Andalus.",
   "Malaga": "Sun-soaked beaches and the birthplace of Picasso.",
@@ -133,9 +133,13 @@ const CITY_FACTS = {
   "Berlin": "Had a very famous wall. Now famous for nightlife and history.",
   "Munich": "Beer halls, pretzels, and a world-renowned autumn festival.",
   "Hamburg": "A massive port city with more bridges than Venice.",
-  "Cologne": "Dominated by an enormous twin-spired Gothic cathedral.",
+  "Köln": "Dominated by an enormous twin-spired Gothic cathedral.",
   "Frankfurt": "Germany's skyscraper-studded banking capital.",
 };
+
+const normName = (s) =>
+  s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z ]/g, " ").replace(/\s+/g, " ").trim();
+const NORM_CITY_FACTS = Object.fromEntries(Object.entries(CITY_FACTS).map(([k, v]) => [normName(k), v]));
 
 /* `pool` is the set of cities for the chosen country, so we can give clues
  * relative to the country (which the player already picked). */
@@ -155,8 +159,9 @@ export function buildCityHints(city, pool = []) {
     else hints.push(`It's in the ${ns}-${ew} part of ${city.country}.`);
   }
 
-  // curated fact (strong pointer)
-  if (CITY_FACTS[city.name]) hints.push(CITY_FACTS[city.name]);
+  // curated fact (strong pointer) — matched accent-insensitively
+  const fact = CITY_FACTS[city.name] || NORM_CITY_FACTS[normName(city.name)];
+  if (fact) hints.push(fact);
 
   // a coastal-ish nudge based on how far it is from the country's average longitude edge
   // (kept simple and always-true-ish): syllable / length clue instead

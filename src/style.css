@@ -673,6 +673,8 @@ body.is-hard .fi-arrow { display: none; }
 }
 .menu-foot a { color: var(--warn); text-decoration: none; font-weight: 600; }
 .menu-foot a:hover { text-decoration: underline; }
+.menu-credit { margin-top: 10px; text-align: center; font-size: 10px; color: var(--txt-dim); opacity: 0.7; }
+.menu-credit a { color: var(--txt-dim); }
 
 .pulse { animation: pulseGlow 0.6s ease; }
 @keyframes pulseGlow {
