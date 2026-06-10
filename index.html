@@ -224,7 +224,7 @@
         <p class="menu-tagline">Everyone races to guess the same secret country. See who's <b>closest</b> and who solves it in the fewest tries.</p>
         <div class="menu-section">
           <div class="menu-label">Your name</div>
-          <input class="mp-input" id="mpName" type="text" maxlength="18" placeholder="e.g. Aymaan" spellcheck="false" />
+          <input class="mp-input" id="mpName" type="text" maxlength="18" placeholder="Pick a nickname" spellcheck="false" />
         </div>
         <button class="play-btn" id="mpCreate">＋ Create a lobby</button>
         <div class="menu-divider"><span>or join one</span></div>
@@ -244,6 +244,13 @@
         <button class="mp-copy" id="mpCopyCode">📋 Copy code</button>
         <div class="menu-label" style="margin-top:18px"><span id="mpPlayerCount">0</span> players</div>
         <ul class="mp-players" id="mpPlayerList"></ul>
+        <div class="mp-diff" id="mpDiffWrap" hidden>
+          <span class="menu-label" style="margin:0">Difficulty</span>
+          <div class="choice-row" id="mpDiffChoice">
+            <button class="choice is-active" data-diff="easy">😌 Easy</button>
+            <button class="choice" data-diff="hard">😤 Hard</button>
+          </div>
+        </div>
         <button class="play-btn" id="mpStart">▶ START</button>
         <div class="mp-wait" id="mpWait" hidden>Waiting for the host to start…</div>
         <button class="mp-leave" id="mpLobbyLeave">Leave lobby</button>

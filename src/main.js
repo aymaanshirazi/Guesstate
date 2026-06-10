@@ -46,6 +46,7 @@ const ui = {
   mpLobby: el("mpLobby"), mpLobbyCode: el("mpLobbyCode"), mpCopyCode: el("mpCopyCode"),
   mpPlayerCount: el("mpPlayerCount"), mpPlayerList: el("mpPlayerList"),
   mpStart: el("mpStart"), mpWait: el("mpWait"), mpLobbyLeave: el("mpLobbyLeave"),
+  mpDiffWrap: el("mpDiffWrap"), mpDiffChoice: el("mpDiffChoice"),
   mpBoard: el("mpBoard"), mpBoardHead: el("mpBoardHead"), mpBoardList: el("mpBoardList"),
   mpResults: el("mpResults"), mpAnswer: el("mpAnswer"), mpStandings: el("mpStandings"),
   mpAgain: el("mpAgain"), mpBackLobby: el("mpBackLobby"), mpResultsLeave: el("mpResultsLeave"),
@@ -81,8 +82,9 @@ const state = {
   dailyTarget: null,
   dailyNumber: 0,
   online: false,
-  mp: { socket: null, code: null, youId: null, hostId: null, players: [], phase: "lobby", asHost: false },
+  mp: { socket: null, code: null, youId: null, hostId: null, players: [], phase: "lobby", asHost: false, mode: "easy" },
 };
+let mpDiff = "easy"; // host's chosen difficulty in the lobby
 // menu selections (before a game starts)
 const menuSel = { mode: "countries", country: null, diff: "easy" };
 const noun = () => (state.gameType === "cities" ? "city" : "country");
@@ -170,13 +172,14 @@ function resolveGuess(raw) {
 }
 
 /* ---------------- game flow ---------------- */
-/* render a guess we already know the distance for (used by both modes) */
-function applyGuess(country, km) {
+/* render a guess we already know the distance for (used by both modes).
+ * brng = bearing to the target (easy mode), or null to hide direction. */
+function applyGuess(country, km, brng = null) {
   const p = proximity(km);
-  state.guessed.set(country.name, { country, km, proximity: p });
+  state.guessed.set(country.name, { country, km, proximity: p, brng });
   render();
   flyTo(country);
-  addFeedItem(country, km, p);
+  addFeedItem(country, km, p, brng);
   updateClosest();
   if (!state.online) ui.feedPanel.hidden = false;
   ui.closestPanel.hidden = false;
@@ -188,7 +191,8 @@ function commitGuess(country) {
     return;
   }
   const km = country === state.target ? 0 : haversine(country, state.target);
-  applyGuess(country, km);
+  const brng = (state.mode === "easy" && km > 0 && state.target) ? bearing(country, state.target) : null;
+  applyGuess(country, km, brng);
   if (country === state.target) return win();
   flash(`${country.name}, ${fmtKm(km)} away`, "ok");
 }
@@ -510,26 +514,24 @@ function updateClosest() {
   ui.closestKm.textContent = fmtKm(best.km);
   ui.proximityFill.style.width = `${(best.proximity * 100).toFixed(0)}%`;
   ui.proximityFill.style.background = `linear-gradient(90deg, #4d7cff, ${heatColor(best.proximity, 1)})`;
-  if (state.mode === "easy" && best.km > 0 && state.target) {
-    const b = bearing(best.country, state.target);
+  if (state.mode === "easy" && best.km > 0 && best.brng != null) {
+    const b = best.brng;
     const arrow = `<span style="display:inline-block;transform:rotate(${b}deg);color:var(--accent-2)">↑</span>`;
     ui.closestDir.innerHTML = `${arrow} target is ${compass(b)} · ${Math.round(b)}°`;
   } else if (state.online) {
-    ui.closestDir.textContent = "";
+    ui.closestDir.textContent = state.mode === "hard" ? "direction hidden · hard mode" : "";
   } else {
     ui.closestDir.textContent = state.mode === "hard" ? "direction hidden · hard mode" : "";
   }
 }
 
-function addFeedItem(country, km, p) {
+function addFeedItem(country, km, p, brng = null) {
   ui.guessCount.textContent = String(state.guessed.size);
   const li = document.createElement("li");
   li.className = "feed-item";
   const color = country === state.target ? "#2ee6a6" : heatColor(p, 1);
-  const canDir = km > 0 && state.target;
-  const b = canDir ? bearing(country, state.target) : 0;
-  const arrow = !canDir ? ""
-    : `<span class="fi-arrow" title="target is ${compass(b)} (${Math.round(b)}°) from ${country.name}" style="transform:rotate(${b}deg)">↑</span>`;
+  const arrow = (brng == null) ? ""
+    : `<span class="fi-arrow" title="target is ${compass(brng)} (${Math.round(brng)}°) from ${country.name}" style="transform:rotate(${brng}deg)">↑</span>`;
   const sub = country.country ? ` <span class="fi-sub">${country.country}</span>` : "";
   li.innerHTML = `
     <span class="fi-name"><span class="fi-dot" style="color:${color};background:${color}"></span>${country.name}${sub}</span>
@@ -600,7 +602,12 @@ ui.mpCopyCode.addEventListener("click", () => {
   ui.mpCopyCode.textContent = "✓ Copied!";
   setTimeout(() => (ui.mpCopyCode.textContent = "📋 Copy code"), 1500);
 });
-ui.mpStart.addEventListener("click", () => state.mp.socket?.send(JSON.stringify({ type: "start" })));
+ui.mpStart.addEventListener("click", () => state.mp.socket?.send(JSON.stringify({ type: "start", mode: mpDiff })));
+ui.mpDiffChoice.addEventListener("click", (e) => {
+  const btn = e.target.closest(".choice"); if (!btn) return;
+  mpDiff = btn.dataset.diff;
+  [...ui.mpDiffChoice.children].forEach((b) => b.classList.toggle("is-active", b === btn));
+});
 ui.mpLobbyLeave.addEventListener("click", leaveMp);
 ui.mpBoardHead.addEventListener("click", () => ui.mpBoard.classList.toggle("collapsed"));
 ui.mpBackLobby.addEventListener("click", () => state.mp.socket?.send(JSON.stringify({ type: "again" })));
@@ -733,13 +740,14 @@ function handleMpMessage(m) {
   if (m.type === "error") { mpMsg(m.message, "err"); return; }
   if (m.type === "guessResult") {
     const country = state.byNorm.get(norm(m.name));
-    if (country) applyGuess(country, m.km);
+    if (country) applyGuess(country, m.km, m.bearing ?? null);
     if (m.solved) { state.solved = true; ui.input.disabled = true; flash("You solved it! Waiting for others…", "ok"); }
     return;
   }
   if (m.type === "state") {
     state.mp.players = m.players;
     state.mp.hostId = m.hostId;
+    state.mp.mode = m.mode || "hard";
     const prev = state.mp.phase;
     state.mp.phase = m.phase;
     if (m.phase === "lobby") enterLobbyView();
@@ -766,6 +774,7 @@ function renderLobbyPlayers() {
     `<li>${esc(p.name)}${p.id === state.mp.youId ? ' <span class="mp-you">(you)</span>' : ""}${p.id === state.mp.hostId ? '<span class="host-tag">HOST</span>' : ""}</li>`
   ).join("");
   ui.mpStart.hidden = !isHost;
+  ui.mpDiffWrap.hidden = !isHost;
   ui.mpWait.hidden = isHost;
   const enough = state.mp.players.length >= 2;
   ui.mpStart.disabled = !enough;
@@ -780,8 +789,8 @@ function enterMpPlay() {
   state.pool = state.sets.countries.pool;
   state.byNorm = state.sets.countries.byNorm;
   state.maxRef = MAX_REF_KM;
-  state.mode = "hard";
-  document.body.classList.add("is-hard");
+  state.mode = state.mp.mode === "easy" ? "easy" : "hard";
+  document.body.classList.toggle("is-hard", state.mode === "hard");
   state.target = null;
   state.solved = false;
   state.guessed.clear();

@@ -829,6 +829,8 @@ body.is-hard .fi-arrow { display: none; }
 .mp-players .host-tag { margin-left: auto; font-size: 10px; font-family: "JetBrains Mono", monospace; color: var(--warn); background: rgba(255, 207, 92, 0.14); padding: 3px 7px; border-radius: 6px; }
 .mp-you { color: var(--accent-2); font-size: 11px; }
 
+.mp-diff { margin: 4px 0 14px; display: flex; flex-direction: column; gap: 8px; }
+.mp-diff .choice { padding: 10px; font-size: 13px; }
 .mp-wait { text-align: center; color: var(--txt-dim); font-size: 14px; padding: 14px 0; }
 .mp-leave { display: block; margin: 14px auto 0; border: 0; background: transparent; color: var(--hot); font-size: 13px; font-weight: 600; cursor: pointer; }
 

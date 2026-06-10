@@ -20,6 +20,13 @@ function haversine(a, b) {
   const h = Math.sin(dLat / 2) ** 2 + Math.cos(la1) * Math.cos(la2) * Math.sin(dLng / 2) ** 2;
   return 2 * R * Math.asin(Math.min(1, Math.sqrt(h)));
 }
+function bearing(a, b) {
+  const toRad = (d) => (d * Math.PI) / 180;
+  const y = Math.sin(toRad(b.lng - a.lng)) * Math.cos(toRad(b.lat));
+  const x = Math.cos(toRad(a.lat)) * Math.sin(toRad(b.lat)) -
+    Math.sin(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.cos(toRad(b.lng - a.lng));
+  return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+}
 
 const MAX_PLAYERS = 10;
 
@@ -32,6 +39,7 @@ export default class GuesstateServer {
     this.hostId = null;
     this.round = 0;
     this.solveCount = 0;
+    this.roundMode = "hard"; // "easy" shows direction, "hard" hides it
   }
 
   onConnect(conn) {
@@ -64,7 +72,10 @@ export default class GuesstateServer {
         this.broadcastState();
         break;
       case "start":
-        if (sender.id === this.hostId && this.players.size >= 1) this.startRound();
+        if (sender.id === this.hostId && this.players.size >= 1) {
+          this.roundMode = msg.mode === "easy" ? "easy" : "hard";
+          this.startRound();
+        }
         break;
       case "guess":
         if (this.phase === "playing" && !p.solved) this.handleGuess(p, msg.name, sender);
@@ -107,9 +118,10 @@ export default class GuesstateServer {
       p.solvedTries = p.tries;
       p.solvedRank = ++this.solveCount;
     }
-    // private feedback to the guesser only (distance for their own guess) so they
-    // can colour the globe + see how close they are. Never sent to others.
-    sender.send(JSON.stringify({ type: "guessResult", name: c.name, km, solved: solvedNow }));
+    // private feedback to the guesser only (distance, + bearing in easy mode) so
+    // they can colour the globe + see how close they are. Never sent to others.
+    const brng = this.roundMode === "easy" && !solvedNow ? Math.round(bearing(c, this.target)) : null;
+    sender.send(JSON.stringify({ type: "guessResult", name: c.name, km, solved: solvedNow, bearing: brng }));
     if ([...this.players.values()].every((pl) => pl.solved)) this.phase = "ended";
     this.broadcastState();
   }
@@ -121,7 +133,7 @@ export default class GuesstateServer {
     }));
     const state = {
       type: "state", phase: this.phase, hostId: this.hostId,
-      code: this.room.id, round: this.round, players,
+      code: this.room.id, round: this.round, mode: this.roundMode, players,
     };
     if (this.phase === "ended" && this.target) state.target = this.target.name; // reveal only at the end
     this.room.broadcast(JSON.stringify(state));

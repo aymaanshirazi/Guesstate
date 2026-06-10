@@ -34,7 +34,8 @@
       "Bash(git commit -q -m 'SEO: meta description, Open Graph + Twitter cards, JSON-LD, favicon, manifest, robots.txt, sitemap.xml, og.png *)",
       "Bash(git commit -q -m 'Add Privacy Policy + Terms pages \\(linked in menu\\); zoom globe out slightly on mobile *)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://127.0.0.1:1999/)",
-      "Bash(git commit -q -m 'Multiplayer Phase 2: lobby create/join, live leaderboard, own-guess feedback, host end-round + results \\(dev-gated until party deploy\\) *)"
+      "Bash(git commit -q -m 'Multiplayer Phase 2: lobby create/join, live leaderboard, own-guess feedback, host end-round + results \\(dev-gated until party deploy\\) *)",
+      "Bash(git commit -q -m 'Multiplayer: host difficulty selection \\(easy shows server-sent bearing, hard hides\\); generic name placeholder *)"
     ]
   }
 }
