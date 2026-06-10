@@ -11,9 +11,11 @@
   "dependencies": {
     "d3-geo": "^3.1.1",
     "globe.gl": "^2.32.0",
+    "partysocket": "^1.1.19",
     "three": "^0.169.0"
   },
   "devDependencies": {
+    "partykit": "^0.0.115",
     "vite": "^5.4.0"
   }
 }
