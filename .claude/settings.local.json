@@ -37,7 +37,9 @@
       "Bash(git commit -q -m 'Multiplayer Phase 2: lobby create/join, live leaderboard, own-guess feedback, host end-round + results \\(dev-gated until party deploy\\) *)",
       "Bash(git commit -q -m 'Multiplayer: host difficulty selection \\(easy shows server-sent bearing, hard hides\\); generic name placeholder *)",
       "Bash(npx partykit *)",
-      "Bash(git commit -q -m 'Multiplayer Phase 3: point production at deployed PartyKit host \\(multiplayer now live\\) *)"
+      "Bash(git commit -q -m 'Multiplayer Phase 3: point production at deployed PartyKit host \\(multiplayer now live\\) *)",
+      "Bash(node scripts/test-mp.mjs guesstate.aymaanshirazi.partykit.dev)",
+      "Bash(git commit *)"
     ]
   }
 }

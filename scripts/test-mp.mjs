@@ -2,11 +2,13 @@
 import { PartySocket } from "partysocket";
 import fs from "fs";
 
+const HOST = process.argv[2] || "127.0.0.1:1999";
+const ROOM = "TESTROOM" + Math.floor(Math.random() * 9999);
 const names = JSON.parse(fs.readFileSync("party/countries.json", "utf8")).map((c) => c.name);
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
 function mk() {
-  const s = new PartySocket({ host: "127.0.0.1:1999", room: "TESTROOM" });
+  const s = new PartySocket({ host: HOST, room: ROOM });
   s.lastState = null; s.myId = null;
   s.addEventListener("message", (e) => {
     const m = JSON.parse(e.data);
