@@ -31,7 +31,8 @@
       "Bash(npm i *)",
       "Bash(node -e \"const sharp=require\\('sharp'\\);const fs=require\\('fs'\\);sharp\\('scripts/og.svg',{density:200}\\).resize\\(1200,630\\).png\\(\\).toFile\\('public/og.png'\\).then\\(\\(\\)=>console.log\\('og.png bytes:',fs.statSync\\('public/og.png'\\).size\\)\\).catch\\(e=>{console.error\\('ERR',e.message\\);process.exit\\(1\\)}\\)\")",
       "Bash(npm un *)",
-      "Bash(git commit -q -m 'SEO: meta description, Open Graph + Twitter cards, JSON-LD, favicon, manifest, robots.txt, sitemap.xml, og.png *)"
+      "Bash(git commit -q -m 'SEO: meta description, Open Graph + Twitter cards, JSON-LD, favicon, manifest, robots.txt, sitemap.xml, og.png *)",
+      "Bash(git commit -q -m 'Add Privacy Policy + Terms pages \\(linked in menu\\); zoom globe out slightly on mobile *)"
     ]
   }
 }

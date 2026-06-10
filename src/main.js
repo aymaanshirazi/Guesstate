@@ -17,6 +17,9 @@ const EARTH_R = 6371;
 
 const COUNTRY_FLAGS = { USA: "🇺🇸", Canada: "🇨🇦", UK: "🇬🇧", Spain: "🇪🇸", France: "🇫🇷", Germany: "🇩🇪" };
 const cap = (s) => s[0].toUpperCase() + s.slice(1);
+const isMobile = () => window.innerWidth <= 720;
+// zoom the camera out a bit on phones so panels don't crowd the highlighted area
+const camAlt = (base) => (isMobile() ? base * 1.45 : base);
 
 const el = (id) => document.getElementById(id);
 const ui = {
@@ -210,7 +213,7 @@ function forfeit() {
     : "You gave up before even guessing. Bold. 🫡";
   showWinButtons();
   ui.winOverlay.hidden = false;
-  globe.pointOfView({ lat: state.target.lat, lng: state.target.lng, altitude: 1.6 }, 900);
+  globe.pointOfView({ lat: state.target.lat, lng: state.target.lng, altitude: camAlt(1.6) }, 900);
 }
 
 function revealHint() {
@@ -256,9 +259,9 @@ function newGame() {
   render();
   // frame the playing field
   if (state.gameType === "cities") {
-    globe.pointOfView({ lat: state.target.lat, lng: state.target.lng, altitude: 1.4 }, 1200);
+    globe.pointOfView({ lat: state.target.lat, lng: state.target.lng, altitude: camAlt(1.4) }, 1200);
   } else {
-    globe.pointOfView({ lat: 20, lng: 0, altitude: 2.5 }, 1200);
+    globe.pointOfView({ lat: 20, lng: 0, altitude: camAlt(2.5) }, 1200);
   }
   // dev aid: console.log("target:", state.target.name);
 }
@@ -456,7 +459,7 @@ function renderLabels() {
 function render() { paintGlobe(); renderLabels(); }
 
 function flyTo(country, altitude) {
-  const alt = altitude ?? (state.gameType === "cities" ? 1.2 : 1.9);
+  const alt = camAlt(altitude ?? (state.gameType === "cities" ? 1.2 : 1.9));
   globe.pointOfView({ lat: country.lat, lng: country.lng, altitude: alt }, 900);
   const rgb = country === state.target ? TARGET_RGB
     : heatRGB(proximity(state.guessed.get(country.name)?.km ?? state.maxRef));
