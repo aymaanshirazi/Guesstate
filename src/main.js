@@ -5,7 +5,8 @@ import "./style.css";
 import { ALIASES } from "./aliases.js";
 import { CITY_ALIASES } from "./cities.js";
 import { buildHints, buildCityHints } from "./hints.js";
-import { KOFI_URL, KOFI_SHOP_URL, PRO_PRICE, VALID_PRO_CODES, PRO_STORAGE_KEY, SITE_URL } from "./config.js";
+import { KOFI_URL, KOFI_SHOP_URL, PRO_PRICE, VALID_PRO_CODES, PRO_STORAGE_KEY, SITE_URL, PARTY_HOST, MULTIPLAYER_ENABLED } from "./config.js";
+import { PartySocket } from "partysocket";
 
 /* ------------------------------------------------------------------ *
  *  GUESSTATE — guess the place on the globe
@@ -38,6 +39,16 @@ const ui = {
   winMenu: el("winMenu"), winShare: el("winShare"), winSupport: el("winSupport"), dailyBtn: el("dailyBtn"),
   hintBtn: el("hintBtn"), forfeitBtn: el("forfeitBtn"),
   hintBox: el("hintBox"), hintTag: el("hintTag"), hintText: el("hintText"),
+  // multiplayer
+  mpBtn: el("mpBtn"),
+  mpSetup: el("mpSetup"), mpSetupClose: el("mpSetupClose"), mpName: el("mpName"),
+  mpCreate: el("mpCreate"), mpJoinForm: el("mpJoinForm"), mpCode: el("mpCode"), mpSetupMsg: el("mpSetupMsg"),
+  mpLobby: el("mpLobby"), mpLobbyCode: el("mpLobbyCode"), mpCopyCode: el("mpCopyCode"),
+  mpPlayerCount: el("mpPlayerCount"), mpPlayerList: el("mpPlayerList"),
+  mpStart: el("mpStart"), mpWait: el("mpWait"), mpLobbyLeave: el("mpLobbyLeave"),
+  mpBoard: el("mpBoard"), mpBoardHead: el("mpBoardHead"), mpBoardList: el("mpBoardList"),
+  mpResults: el("mpResults"), mpAnswer: el("mpAnswer"), mpStandings: el("mpStandings"),
+  mpAgain: el("mpAgain"), mpBackLobby: el("mpBackLobby"), mpResultsLeave: el("mpResultsLeave"),
   // menu
   menu: el("menu"), modeChoice: el("modeChoice"), citiesProBadge: el("citiesProBadge"),
   countrySection: el("countrySection"), countryChoice: el("countryChoice"),
@@ -69,6 +80,8 @@ const state = {
   daily: false,
   dailyTarget: null,
   dailyNumber: 0,
+  online: false,
+  mp: { socket: null, code: null, youId: null, hostId: null, players: [], phase: "lobby", asHost: false },
 };
 // menu selections (before a game starts)
 const menuSel = { mode: "countries", country: null, diff: "easy" };
@@ -157,22 +170,25 @@ function resolveGuess(raw) {
 }
 
 /* ---------------- game flow ---------------- */
+/* render a guess we already know the distance for (used by both modes) */
+function applyGuess(country, km) {
+  const p = proximity(km);
+  state.guessed.set(country.name, { country, km, proximity: p });
+  render();
+  flyTo(country);
+  addFeedItem(country, km, p);
+  updateClosest();
+  if (!state.online) ui.feedPanel.hidden = false;
+  ui.closestPanel.hidden = false;
+}
+
 function commitGuess(country) {
   if (state.solved || state.guessed.has(country.name)) {
     if (state.guessed.has(country.name)) flash(`You already guessed ${country.name}.`, "warn");
     return;
   }
   const km = country === state.target ? 0 : haversine(country, state.target);
-  const p = proximity(km);
-  state.guessed.set(country.name, { country, km, proximity: p });
-
-  render();
-  flyTo(country);
-  addFeedItem(country, km, p);
-  updateClosest();
-  ui.feedPanel.hidden = false;
-  ui.closestPanel.hidden = false;
-
+  applyGuess(country, km);
   if (country === state.target) return win();
   flash(`${country.name}, ${fmtKm(km)} away`, "ok");
 }
@@ -200,6 +216,10 @@ function showWinButtons() {
 }
 
 function forfeit() {
+  if (state.online) { // host ends the round for everyone
+    if (state.mp.hostId === state.mp.youId) state.mp.socket?.send(JSON.stringify({ type: "end" }));
+    return;
+  }
   if (state.solved) return;
   endGame();
   render();
@@ -243,7 +263,9 @@ function newGame() {
   state.hintIndex = 0;
   ui.hintBtn.disabled = false;
   ui.forfeitBtn.disabled = false;
+  ui.input.disabled = false;
   ui.hintBtn.textContent = "💡 Hint";
+  ui.forfeitBtn.textContent = "🏳️ Give up";
   ui.hintBox.hidden = true;
   ui.feedList.innerHTML = "";
   ui.guessCount.textContent = "0";
@@ -272,6 +294,15 @@ function showMenu() {
   state.target = null;
   state.guessed.clear();
   state.solved = false;
+  // tear down any multiplayer session
+  state.online = false;
+  if (state.mp.socket) { try { state.mp.socket.close(); } catch {} state.mp.socket = null; }
+  closeMpOverlays();
+  ui.mpBoard.hidden = true;
+  ui.input.disabled = false;
+  ui.hintBtn.style.display = "";
+  ui.forfeitBtn.style.display = "";
+  ui.mpBtn.hidden = !MULTIPLAYER_ENABLED;
   if (globe) { render(); controls.autoRotate = true; globe.pointOfView({ altitude: 2.5 }, 1000); }
   ui.topBar.hidden = true;
   ui.inputBar.hidden = true;
@@ -302,6 +333,7 @@ function applyMenuSelectionUI() {
 
 function startGame() {
   state.daily = false;
+  state.online = false;
   if (menuSel.mode === "cities") {
     if (!isPro()) { openUnlock(); return; }
     if (!menuSel.country) { pulse(ui.countrySection); return; }
@@ -357,6 +389,7 @@ function pickDaily() {
 function startDaily() {
   const { country, number } = pickDaily();
   state.daily = true;
+  state.online = false;
   state.dailyTarget = country;
   state.dailyNumber = number;
   state.gameType = "countries";
@@ -477,10 +510,12 @@ function updateClosest() {
   ui.closestKm.textContent = fmtKm(best.km);
   ui.proximityFill.style.width = `${(best.proximity * 100).toFixed(0)}%`;
   ui.proximityFill.style.background = `linear-gradient(90deg, #4d7cff, ${heatColor(best.proximity, 1)})`;
-  if (state.mode === "easy" && best.km > 0) {
+  if (state.mode === "easy" && best.km > 0 && state.target) {
     const b = bearing(best.country, state.target);
     const arrow = `<span style="display:inline-block;transform:rotate(${b}deg);color:var(--accent-2)">↑</span>`;
     ui.closestDir.innerHTML = `${arrow} target is ${compass(b)} · ${Math.round(b)}°`;
+  } else if (state.online) {
+    ui.closestDir.textContent = "";
   } else {
     ui.closestDir.textContent = state.mode === "hard" ? "direction hidden · hard mode" : "";
   }
@@ -491,8 +526,9 @@ function addFeedItem(country, km, p) {
   const li = document.createElement("li");
   li.className = "feed-item";
   const color = country === state.target ? "#2ee6a6" : heatColor(p, 1);
-  const b = km === 0 ? 0 : bearing(country, state.target);
-  const arrow = km === 0 ? ""
+  const canDir = km > 0 && state.target;
+  const b = canDir ? bearing(country, state.target) : 0;
+  const arrow = !canDir ? ""
     : `<span class="fi-arrow" title="target is ${compass(b)} (${Math.round(b)}°) from ${country.name}" style="transform:rotate(${b}deg)">↑</span>`;
   const sub = country.country ? ` <span class="fi-sub">${country.country}</span>` : "";
   li.innerHTML = `
@@ -524,7 +560,7 @@ ui.form.addEventListener("submit", (e) => {
   ui.suggest.hidden = true;
   state.pendingSuggestion = null;
   const res = resolveGuess(raw);
-  if (res.type === "exact") { ui.input.value = ""; commitGuess(res.country); }
+  if (res.type === "exact") { ui.input.value = ""; sendOrCommit(res.country); }
   else if (res.type === "suggest") {
     state.pendingSuggestion = res.country;
     ui.suggestName.textContent = res.country.name;
@@ -537,7 +573,7 @@ ui.form.addEventListener("submit", (e) => {
 ui.suggestYes.addEventListener("click", () => {
   if (!state.pendingSuggestion) return;
   ui.suggest.hidden = true; ui.input.value = "";
-  const c = state.pendingSuggestion; state.pendingSuggestion = null; commitGuess(c);
+  const c = state.pendingSuggestion; state.pendingSuggestion = null; sendOrCommit(c);
 });
 ui.suggestNo.addEventListener("click", () => { ui.suggest.hidden = true; state.pendingSuggestion = null; ui.input.focus(); });
 
@@ -545,14 +581,30 @@ ui.hintBtn.addEventListener("click", revealHint);
 ui.forfeitBtn.addEventListener("click", forfeit);
 ui.winAgain.addEventListener("click", newGame);
 ui.winMenu.addEventListener("click", showMenu);
-// confirm before leaving a game that's in progress
+// confirm before leaving a game that's in progress (or any multiplayer game)
 ui.menuBtn.addEventListener("click", () => {
-  if (!state.solved && state.guessed.size > 0) ui.confirmLeave.hidden = false;
+  if (state.online || (!state.solved && state.guessed.size > 0)) ui.confirmLeave.hidden = false;
   else showMenu();
 });
 ui.confirmStay.addEventListener("click", () => { ui.confirmLeave.hidden = true; });
 ui.confirmLeave.addEventListener("click", (e) => { if (e.target === ui.confirmLeave) ui.confirmLeave.hidden = true; });
-ui.confirmLeaveBtn.addEventListener("click", () => { ui.confirmLeave.hidden = true; showMenu(); });
+ui.confirmLeaveBtn.addEventListener("click", () => { ui.confirmLeave.hidden = true; state.online ? leaveMp() : showMenu(); });
+
+// multiplayer
+ui.mpBtn.addEventListener("click", openMpSetup);
+ui.mpSetupClose.addEventListener("click", () => { closeMpOverlays(); showMenu(); });
+ui.mpCreate.addEventListener("click", createLobby);
+ui.mpJoinForm.addEventListener("submit", (e) => { e.preventDefault(); joinLobby(ui.mpCode.value); });
+ui.mpCopyCode.addEventListener("click", () => {
+  navigator.clipboard?.writeText(state.mp.code);
+  ui.mpCopyCode.textContent = "✓ Copied!";
+  setTimeout(() => (ui.mpCopyCode.textContent = "📋 Copy code"), 1500);
+});
+ui.mpStart.addEventListener("click", () => state.mp.socket?.send(JSON.stringify({ type: "start" })));
+ui.mpLobbyLeave.addEventListener("click", leaveMp);
+ui.mpBoardHead.addEventListener("click", () => ui.mpBoard.classList.toggle("collapsed"));
+ui.mpBackLobby.addEventListener("click", () => state.mp.socket?.send(JSON.stringify({ type: "again" })));
+ui.mpResultsLeave.addEventListener("click", leaveMp);
 ui.dailyBtn.addEventListener("click", startDaily);
 ui.winShare.addEventListener("click", shareResult);
 ui.feedHead.addEventListener("click", () => ui.feedPanel.classList.toggle("collapsed"));
@@ -633,6 +685,177 @@ function addOrbiters() {
   const tick = () => { group.rotation.y += 0.0011; requestAnimationFrame(tick); };
   tick();
 }
+
+/* ---------------- multiplayer ---------------- */
+function sendOrCommit(country) { state.online ? sendGuess(country) : commitGuess(country); }
+
+function sendGuess(country) {
+  if (state.solved) return;
+  if (state.guessed.has(country.name)) { flash(`You already guessed ${country.name}.`, "warn"); return; }
+  state.mp.socket?.send(JSON.stringify({ type: "guess", name: country.name }));
+}
+
+const randCode = () => Array.from({ length: 4 }, () => "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[Math.floor(Math.random() * 32)]).join("");
+const mpMsg = (t, cls) => { ui.mpSetupMsg.textContent = t; ui.mpSetupMsg.className = "unlock-msg " + (cls || ""); };
+
+function myName() {
+  const n = (ui.mpName.value || "").trim().slice(0, 18) || "Player";
+  localStorage.setItem("guesstate_name", n);
+  return n;
+}
+function openMpSetup() {
+  mpMsg("");
+  if (!ui.mpName.value) ui.mpName.value = localStorage.getItem("guesstate_name") || "";
+  ui.mpSetup.hidden = false;
+  ui.mpName.focus();
+}
+function closeMpOverlays() { ui.mpSetup.hidden = true; ui.mpLobby.hidden = true; ui.mpResults.hidden = true; }
+
+function connectLobby(code, asHost) {
+  state.online = true;
+  state.mp.code = code;
+  state.mp.asHost = asHost;
+  const sock = new PartySocket({ host: PARTY_HOST, room: code });
+  state.mp.socket = sock;
+  sock.addEventListener("message", (e) => { try { handleMpMessage(JSON.parse(e.data)); } catch {} });
+  sock.addEventListener("open", () => sock.send(JSON.stringify({ type: "join", name: myName() })));
+  sock.addEventListener("error", () => mpMsg("Couldn't connect to the lobby server. Try again.", "err"));
+}
+function createLobby() { connectLobby(randCode(), true); }
+function joinLobby(raw) {
+  const code = (raw || "").trim().toUpperCase();
+  if (code.length < 3) return mpMsg("Enter a valid lobby code.", "err");
+  connectLobby(code, false);
+}
+
+function handleMpMessage(m) {
+  if (m.type === "welcome") { state.mp.youId = m.id; return; }
+  if (m.type === "error") { mpMsg(m.message, "err"); return; }
+  if (m.type === "guessResult") {
+    const country = state.byNorm.get(norm(m.name));
+    if (country) applyGuess(country, m.km);
+    if (m.solved) { state.solved = true; ui.input.disabled = true; flash("You solved it! Waiting for others…", "ok"); }
+    return;
+  }
+  if (m.type === "state") {
+    state.mp.players = m.players;
+    state.mp.hostId = m.hostId;
+    const prev = state.mp.phase;
+    state.mp.phase = m.phase;
+    if (m.phase === "lobby") enterLobbyView();
+    else if (m.phase === "playing") { if (prev !== "playing") enterMpPlay(); renderBoard(); }
+    else if (m.phase === "ended") showMpResults(m);
+    return;
+  }
+}
+
+function enterLobbyView() {
+  closeMpOverlays();
+  ui.menu.hidden = true;
+  ui.topBar.hidden = true; ui.inputBar.hidden = true;
+  ui.closestPanel.hidden = true; ui.feedPanel.hidden = true; ui.mpBoard.hidden = true;
+  if (controls) { controls.autoRotate = true; globe.pointOfView({ altitude: 2.5 }, 800); }
+  ui.mpLobby.hidden = false;
+  ui.mpLobbyCode.textContent = state.mp.code;
+  renderLobbyPlayers();
+}
+function renderLobbyPlayers() {
+  const isHost = state.mp.hostId === state.mp.youId;
+  ui.mpPlayerCount.textContent = String(state.mp.players.length);
+  ui.mpPlayerList.innerHTML = state.mp.players.map((p) =>
+    `<li>${esc(p.name)}${p.id === state.mp.youId ? ' <span class="mp-you">(you)</span>' : ""}${p.id === state.mp.hostId ? '<span class="host-tag">HOST</span>' : ""}</li>`
+  ).join("");
+  ui.mpStart.hidden = !isHost;
+  ui.mpWait.hidden = isHost;
+  const enough = state.mp.players.length >= 2;
+  ui.mpStart.disabled = !enough;
+  ui.mpStart.textContent = enough ? "▶ START" : "Waiting for players…";
+}
+
+function enterMpPlay() {
+  closeMpOverlays();
+  state.gameType = "countries";
+  state.online = true;
+  state.cityCountry = null;
+  state.pool = state.sets.countries.pool;
+  state.byNorm = state.sets.countries.byNorm;
+  state.maxRef = MAX_REF_KM;
+  state.mode = "hard";
+  document.body.classList.add("is-hard");
+  state.target = null;
+  state.solved = false;
+  state.guessed.clear();
+  ui.feedList.innerHTML = "";
+  ui.input.disabled = false;
+  ui.input.value = "";
+  ui.input.placeholder = "Type a country and press Enter…";
+  ui.gameReadout.textContent = `👥 Lobby ${state.mp.code}`;
+  ui.hint.textContent = "";
+  ui.feedPanel.hidden = true;
+  ui.closestPanel.hidden = true;
+  ui.hintBtn.style.display = "none";
+  const isHost = state.mp.hostId === state.mp.youId;
+  ui.forfeitBtn.style.display = isHost ? "" : "none";
+  ui.forfeitBtn.textContent = "🏁 End round";
+  ui.forfeitBtn.disabled = false;
+  ui.topBar.hidden = false;
+  ui.inputBar.hidden = false;
+  ui.mpBoard.hidden = false;
+  ui.mpBoard.classList.remove("collapsed");
+  if (controls) controls.autoRotate = false;
+  render();
+  globe.pointOfView({ lat: 20, lng: 0, altitude: camAlt(2.5) }, 1000);
+  ui.input.focus();
+}
+
+function cmpPlayers(a, b) {
+  if (a.solved && b.solved) return a.solvedTries - b.solvedTries;
+  if (a.solved) return -1;
+  if (b.solved) return 1;
+  return (a.closestKm ?? Infinity) - (b.closestKm ?? Infinity);
+}
+function renderBoard() {
+  const players = [...state.mp.players].sort(cmpPlayers);
+  ui.mpBoardList.innerHTML = players.map((p, i) => {
+    const stat = p.solved ? `✓ ${p.solvedTries}` : (p.closestKm != null ? `${Math.round(p.closestKm).toLocaleString()}km` : "—");
+    return `<li class="board-row ${p.id === state.mp.youId ? "is-you" : ""} ${p.solved ? "solved" : ""}">
+      <span class="board-rank">${i + 1}</span>
+      <span class="board-name">${esc(p.name)}</span>
+      <span class="board-stat">${stat}</span></li>`;
+  }).join("");
+}
+
+function showMpResults(m) {
+  state.solved = true;
+  if (m.target) { state.target = state.byNorm.get(norm(m.target)) || { name: m.target }; render(); }
+  ui.input.disabled = true;
+  ui.mpBoard.hidden = true;
+  ui.inputBar.hidden = true;
+  ui.mpAnswer.textContent = m.target || "—";
+  const players = [...state.mp.players].sort(cmpPlayers);
+  ui.mpStandings.innerHTML = players.map((p, i) => {
+    const medal = ["🥇", "🥈", "🥉"][i] || `${i + 1}.`;
+    const stat = p.solved ? `solved in ${p.solvedTries}` : (p.closestKm != null ? `closest ${Math.round(p.closestKm).toLocaleString()} km` : "no guesses");
+    return `<li><span class="board-rank">${medal}</span><span class="board-name">${esc(p.name)}${p.id === state.mp.youId ? " (you)" : ""}</span><span class="board-stat">${stat}</span></li>`;
+  }).join("");
+  ui.mpBackLobby.hidden = state.mp.hostId !== state.mp.youId;
+  ui.mpAgain.hidden = true;
+  ui.mpResults.hidden = false;
+}
+
+function leaveMp() {
+  try { state.mp.socket?.close(); } catch {}
+  state.mp.socket = null;
+  state.online = false;
+  closeMpOverlays();
+  ui.mpBoard.hidden = true;
+  ui.input.disabled = false;
+  ui.hintBtn.style.display = "";
+  ui.forfeitBtn.style.display = "";
+  showMenu();
+}
+
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
 /* ---------------- boot ---------------- */
 const CITY_TARGET_MIN_POP = 250000; // answers come from "well-known" cities only

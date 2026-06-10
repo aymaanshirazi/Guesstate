@@ -67,7 +67,7 @@ export default class GuesstateServer {
         if (sender.id === this.hostId && this.players.size >= 1) this.startRound();
         break;
       case "guess":
-        if (this.phase === "playing" && !p.solved) this.handleGuess(p, msg.name);
+        if (this.phase === "playing" && !p.solved) this.handleGuess(p, msg.name, sender);
         break;
       case "end": // host reveals / ends the round early
         if (sender.id === this.hostId && this.phase === "playing") {
@@ -95,17 +95,21 @@ export default class GuesstateServer {
     this.broadcastState();
   }
 
-  handleGuess(p, name) {
+  handleGuess(p, name, sender) {
     const c = BY_NORM.get(norm(String(name || "")));
     if (!c) return; // client pre-resolves names; ignore anything unknown
     p.tries++;
-    const km = c.name === this.target.name ? 0 : haversine(c, this.target);
+    const solvedNow = c.name === this.target.name;
+    const km = solvedNow ? 0 : haversine(c, this.target);
     if (p.closestKm === null || km < p.closestKm) p.closestKm = km;
-    if (c.name === this.target.name) {
+    if (solvedNow) {
       p.solved = true;
       p.solvedTries = p.tries;
       p.solvedRank = ++this.solveCount;
     }
+    // private feedback to the guesser only (distance for their own guess) so they
+    // can colour the globe + see how close they are. Never sent to others.
+    sender.send(JSON.stringify({ type: "guessResult", name: c.name, km, solved: solvedNow }));
     if ([...this.players.values()].every((pl) => pl.solved)) this.phase = "ended";
     this.broadcastState();
   }

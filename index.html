@@ -133,6 +133,14 @@
           </span>
           <span class="daily-go">▶</span>
         </button>
+        <button class="daily-btn mp-btn" id="mpBtn" hidden>
+          <span class="daily-emoji">👥</span>
+          <span class="daily-text">
+            <span class="daily-main">PLAY WITH FRIENDS</span>
+            <span class="daily-sub">create a lobby, race to guess first</span>
+          </span>
+          <span class="daily-go">▶</span>
+        </button>
         <div class="menu-divider"><span>or free play</span></div>
 
         <div class="menu-section">
@@ -204,6 +212,64 @@
           <button class="win-menu" id="winMenu">Menu</button>
         </div>
         <a class="win-support" id="winSupport" href="#" target="_blank" rel="noopener noreferrer">☕ Enjoying Guesstate? Support it</a>
+      </div>
+    </div>
+
+    <!-- ============ MULTIPLAYER ============ -->
+    <!-- Setup: name + create/join -->
+    <div class="menu-overlay mp-overlay" id="mpSetup" hidden>
+      <div class="menu-card">
+        <button class="unlock-close" id="mpSetupClose">✕</button>
+        <div class="menu-brand"><span class="menu-mark">👥</span><h1 class="menu-title" style="font-size:26px;letter-spacing:4px">FRIENDS</h1></div>
+        <p class="menu-tagline">Everyone races to guess the same secret country. See who's <b>closest</b> and who solves it in the fewest tries.</p>
+        <div class="menu-section">
+          <div class="menu-label">Your name</div>
+          <input class="mp-input" id="mpName" type="text" maxlength="18" placeholder="e.g. Aymaan" spellcheck="false" />
+        </div>
+        <button class="play-btn" id="mpCreate">＋ Create a lobby</button>
+        <div class="menu-divider"><span>or join one</span></div>
+        <form class="mp-join" id="mpJoinForm">
+          <input class="mp-input" id="mpCode" type="text" maxlength="6" placeholder="LOBBY CODE" spellcheck="false" autocapitalize="characters" />
+          <button type="submit" class="mp-join-btn">Join</button>
+        </form>
+        <div class="unlock-msg" id="mpSetupMsg"></div>
+      </div>
+    </div>
+
+    <!-- Lobby waiting room -->
+    <div class="menu-overlay mp-overlay" id="mpLobby" hidden>
+      <div class="menu-card">
+        <div class="menu-label" style="text-align:center">LOBBY CODE — share it with friends</div>
+        <div class="mp-code" id="mpLobbyCode">----</div>
+        <button class="mp-copy" id="mpCopyCode">📋 Copy code</button>
+        <div class="menu-label" style="margin-top:18px"><span id="mpPlayerCount">0</span> players</div>
+        <ul class="mp-players" id="mpPlayerList"></ul>
+        <button class="play-btn" id="mpStart">▶ START</button>
+        <div class="mp-wait" id="mpWait" hidden>Waiting for the host to start…</div>
+        <button class="mp-leave" id="mpLobbyLeave">Leave lobby</button>
+      </div>
+    </div>
+
+    <!-- Live leaderboard during play -->
+    <aside class="hud hud-board" id="mpBoard" hidden>
+      <button class="feed-head" id="mpBoardHead" type="button">
+        <span>LEADERBOARD</span><span class="feed-chevron">▾</span>
+      </button>
+      <ul class="board-list" id="mpBoardList"></ul>
+    </aside>
+
+    <!-- Round results -->
+    <div class="win-overlay mp-overlay" id="mpResults" hidden>
+      <div class="win-card">
+        <div class="win-burst">🏁</div>
+        <h2 class="win-title">RESULTS</h2>
+        <p class="win-country">The answer was <b id="mpAnswer">—</b></p>
+        <ul class="mp-standings" id="mpStandings"></ul>
+        <div class="win-btns">
+          <button class="win-again" id="mpAgain" hidden>Play again</button>
+          <button class="win-menu" id="mpBackLobby">Back to lobby</button>
+          <button class="win-menu" id="mpResultsLeave">Leave</button>
+        </div>
       </div>
     </div>
 

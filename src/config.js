@@ -16,6 +16,13 @@ export const PRO_PRICE = "$2.99";
 // Your live game URL, used in the Daily share text.
 export const SITE_URL = "https://guesstate.com";
 
+// Multiplayer (PartyKit) server host. In dev it's local; in production set this
+// to your deployed party host (Phase 3), e.g. "guesstate.YOURNAME.partykit.dev".
+export const PARTY_HOST = import.meta.env.DEV ? "127.0.0.1:1999" : "";
+// Multiplayer button only shows when a host is configured (so prod stays hidden
+// until the party is deployed).
+export const MULTIPLAYER_ENABLED = !!PARTY_HOST;
+
 /* Valid unlock codes for Cities (Pro). Anyone who buys gets one of these.
  * NOTE: this is a client-side gate — convenient, not piracy-proof. Fine for a
  * low-price casual unlock. To rotate codes, just edit this list and redeploy.

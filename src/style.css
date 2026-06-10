@@ -777,6 +777,86 @@ body.is-hard .fi-arrow { display: none; }
 .coffee:active { transform: translateY(0); }
 .coffee-emoji { font-size: 15px; }
 
+/* ---------- multiplayer ---------- */
+.mp-btn { border-color: rgba(0, 224, 198, 0.35); background: linear-gradient(100deg, rgba(0, 224, 198, 0.14), rgba(77, 124, 255, 0.1)); }
+.mp-btn:hover { border-color: var(--accent-2); box-shadow: 0 0 26px -8px var(--accent-2); }
+.mp-btn .daily-main { color: var(--accent-2); }
+
+.mp-input {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.32);
+  border: 1px solid var(--panel-brd);
+  border-radius: 11px;
+  color: var(--txt);
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 16px;
+  padding: 13px 14px;
+}
+.mp-input:focus { outline: none; border-color: var(--accent-2); }
+#mpCode { text-transform: uppercase; letter-spacing: 3px; font-family: "JetBrains Mono", monospace; text-align: center; }
+
+.mp-join { display: flex; gap: 8px; }
+.mp-join .mp-input { flex: 1; }
+.mp-join-btn {
+  border: 0; border-radius: 11px; padding: 0 20px; cursor: pointer; font-weight: 700;
+  background: linear-gradient(180deg, var(--accent), #3a63e6); color: #fff;
+}
+
+.mp-code {
+  text-align: center;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 44px;
+  font-weight: 700;
+  letter-spacing: 10px;
+  color: var(--accent-2);
+  text-shadow: 0 0 26px rgba(0, 224, 198, 0.5);
+  margin: 6px 0 12px;
+  padding-left: 10px;
+}
+.mp-copy {
+  display: block; margin: 0 auto; border: 1px solid var(--panel-brd);
+  background: rgba(0, 0, 0, 0.3); color: var(--txt); border-radius: 9px;
+  padding: 8px 16px; cursor: pointer; font-size: 13px;
+}
+.mp-copy:hover { background: rgba(77, 124, 255, 0.16); }
+
+.mp-players, .mp-standings, .board-list { list-style: none; }
+.mp-players { margin: 8px 0 18px; display: flex; flex-direction: column; gap: 7px; max-height: 28vh; overflow-y: auto; }
+.mp-players li {
+  display: flex; align-items: center; gap: 9px;
+  background: rgba(0, 0, 0, 0.22); padding: 9px 12px; border-radius: 10px; font-size: 14px;
+}
+.mp-players .host-tag { margin-left: auto; font-size: 10px; font-family: "JetBrains Mono", monospace; color: var(--warn); background: rgba(255, 207, 92, 0.14); padding: 3px 7px; border-radius: 6px; }
+.mp-you { color: var(--accent-2); font-size: 11px; }
+
+.mp-wait { text-align: center; color: var(--txt-dim); font-size: 14px; padding: 14px 0; }
+.mp-leave { display: block; margin: 14px auto 0; border: 0; background: transparent; color: var(--hot); font-size: 13px; font-weight: 600; cursor: pointer; }
+
+/* leaderboard panel during play (same slot as the feed) */
+.hud-board {
+  top: 86px; right: 18px; width: 240px; max-height: 52vh;
+  padding: 12px 8px 12px 14px; display: flex; flex-direction: column;
+}
+.hud-board.collapsed .board-list { display: none; }
+.hud-board.collapsed .feed-head { margin-bottom: 0; }
+.hud-board.collapsed .feed-chevron { transform: rotate(-90deg); }
+.board-list { overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding-right: 6px; }
+.board-row {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(0, 0, 0, 0.22); padding: 8px 10px; border-radius: 9px; font-size: 13px;
+  animation: slideIn 0.3s ease both;
+}
+.board-row.is-you { outline: 1px solid rgba(0, 224, 198, 0.4); }
+.board-rank { font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--txt-dim); width: 18px; flex: none; }
+.board-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+.board-stat { font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--accent-2); flex: none; }
+.board-row.solved .board-stat { color: var(--good); }
+
+.mp-standings { display: flex; flex-direction: column; gap: 8px; margin: 16px 0 22px; text-align: left; }
+.mp-standings li { display: flex; align-items: center; gap: 10px; background: rgba(0, 0, 0, 0.25); padding: 10px 13px; border-radius: 10px; }
+.mp-standings .board-rank { font-size: 14px; width: 26px; }
+.mp-standings .board-name { font-size: 15px; }
+
 /* ---------- confirm leave modal ---------- */
 .confirm-overlay {
   position: fixed;
@@ -866,7 +946,7 @@ body.is-hard .fi-arrow { display: none; }
 
   /* FEED: collapsible panel directly under the CLOSEST bar (never hidden behind
      the input/keyboard); full width so names fit on one line */
-  .hud-feed {
+  .hud-feed, .hud-board {
     top: 170px; bottom: auto; left: 10px; right: 10px; width: auto;
     max-height: 36vh; padding: 10px 8px 10px 14px;
   }
