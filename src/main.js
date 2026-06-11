@@ -473,8 +473,8 @@ function paintGlobe() {
     })
     .polygonAltitude((f) => {
       const name = effName(f);
-      if (state.solved && state.target && name === state.target.name) return 0.06;
-      return state.guessed.has(name) ? 0.035 : 0.008;
+      if (state.solved && state.target && name === state.target.name) return 0.03;
+      return state.guessed.has(name) ? 0.02 : 0.008;
     })
     .polygonStrokeColor((f) =>
       state.guessed.has(effName(f)) ? "rgba(255,255,255,0.55)" : "rgba(120,150,230,0.18)"
@@ -482,12 +482,16 @@ function paintGlobe() {
 }
 
 function renderLabels() {
-  if (state.gameType !== "cities") { globe.labelsData([]); return; }
+  // label every guessed place on the globe so you can see which highlighted
+  // country/city is which. Cities use the heat colour; countries use white text
+  // (readable over the coloured land).
+  const cities = state.gameType === "cities";
   const labels = [...state.guessed.values()].map((g) => ({
     lat: g.country.lat, lng: g.country.lng, name: g.country.name,
-    color: g.country === state.target ? "#2ee6a6" : heatColor(g.proximity, 1),
+    color: g.country === state.target ? "#2ee6a6" : (cities ? heatColor(g.proximity, 1) : "rgba(255,255,255,0.96)"),
   }));
-  if (state.solved && state.target && !state.guessed.has(state.target.name)) {
+  // reveal the answer's label at the end (won/forfeit/round-over)
+  if (state.solved && state.target && state.target.lat != null && !state.guessed.has(state.target.name)) {
     labels.push({ lat: state.target.lat, lng: state.target.lng, name: state.target.name, color: "#2ee6a6" });
   }
   globe.labelsData(labels);
@@ -908,6 +912,13 @@ async function boot() {
     const country = { name, iso2: f.properties.ISO_A2, feature: f, lat, lng };
     state.sets.countries.pool.push(country);
     state.sets.countries.byNorm.set(norm(name), country);
+    // also accept the short common name (e.g. "Tanzania" -> "United Republic of
+    // Tanzania", "Czechia", "Bolivia"...) so formal ADMIN names aren't a barrier
+    for (const alt of [f.properties.NAME, f.properties.NAME_LONG, f.properties.GEOUNIT]) {
+      if (alt && norm(alt) && !state.sets.countries.byNorm.has(norm(alt))) {
+        state.sets.countries.byNorm.set(norm(alt), country);
+      }
+    }
   }
   for (const [alias, canonical] of Object.entries(ALIASES)) {
     const c = state.sets.countries.byNorm.get(norm(canonical));
@@ -950,8 +961,8 @@ async function boot() {
     .arcsTransitionDuration(0)
     .arcsData(makeDecoArcs(20))
     .labelLat((d) => d.lat).labelLng((d) => d.lng).labelText((d) => d.name)
-    .labelColor((d) => d.color).labelDotRadius(0.32).labelSize(0.95)
-    .labelResolution(2).labelAltitude(0.012).labelsTransitionDuration(300)
+    .labelColor((d) => d.color).labelDotRadius(0.22).labelSize(0.9)
+    .labelResolution(2).labelAltitude(0.04).labelsTransitionDuration(300)
     .labelsData([]);
 
   const mat = globe.globeMaterial();
