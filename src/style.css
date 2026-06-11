@@ -39,7 +39,7 @@ html, body {
   width: 100%;
   background: radial-gradient(120% 120% at 50% -10%, #11183a 0%, var(--bg-2) 38%, var(--bg) 100%);
   color: var(--txt);
-  font-family: "Space Grotesk", system-ui, sans-serif;
+  font-family: "Geist", system-ui, sans-serif;
   overflow: hidden;
   overflow-x: hidden;
   overscroll-behavior: none;
@@ -159,7 +159,7 @@ body::after {
   border: 0;
   background: transparent;
   color: var(--txt-dim);
-  font-family: "Space Grotesk", sans-serif;
+  font-family: "Geist", sans-serif;
   font-size: 12px;
   font-weight: 600;
   padding: 7px 13px;
@@ -334,7 +334,7 @@ body.is-hard .fi-arrow { display: none; }
   border: 0;
   outline: 0;
   color: var(--txt);
-  font-family: "Space Grotesk", sans-serif;
+  font-family: "Geist", sans-serif;
   font-size: 17px;
   padding: 10px 0;
 }
@@ -366,7 +366,7 @@ body.is-hard .fi-arrow { display: none; }
   border: 1px solid var(--panel-brd);
   background: rgba(0, 0, 0, 0.28);
   color: var(--txt);
-  font-family: "Space Grotesk", sans-serif;
+  font-family: "Geist", sans-serif;
   font-size: 13px;
   font-weight: 600;
   padding: 9px 18px;
@@ -618,7 +618,7 @@ body.is-hard .fi-arrow { display: none; }
   border: 1px solid var(--panel-brd);
   background: rgba(0, 0, 0, 0.28);
   color: var(--txt);
-  font-family: "Space Grotesk", sans-serif;
+  font-family: "Geist", sans-serif;
   font-size: 14px;
   font-weight: 600;
   padding: 13px 12px;
@@ -765,7 +765,7 @@ body.is-hard .fi-arrow { display: none; }
   border-radius: 10px;
   text-decoration: none;
   color: #2a1d04;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: "Geist", sans-serif;
   font-weight: 700;
   font-size: 13px;
   background: linear-gradient(180deg, #ffd75e, #ffbf36);
@@ -788,7 +788,7 @@ body.is-hard .fi-arrow { display: none; }
   border: 1px solid var(--panel-brd);
   border-radius: 11px;
   color: var(--txt);
-  font-family: "Space Grotesk", sans-serif;
+  font-family: "Geist", sans-serif;
   font-size: 16px;
   padding: 13px 14px;
 }
