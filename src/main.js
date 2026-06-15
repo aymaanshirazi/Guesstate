@@ -307,7 +307,7 @@ function showMenu() {
   ui.hintBtn.style.display = "";
   ui.forfeitBtn.style.display = "";
   ui.mpBtn.hidden = !MULTIPLAYER_ENABLED;
-  if (globe) { render(); controls.autoRotate = true; globe.pointOfView({ altitude: 2.5 }, 1000); }
+  if (globe) { render(); controls.autoRotate = true; controls.autoRotateSpeed = 0.7; globe.pointOfView({ altitude: 2.3 }, 1100); }
   ui.topBar.hidden = true;
   ui.inputBar.hidden = true;
   ui.closestPanel.hidden = true;
