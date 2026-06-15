@@ -36,11 +36,13 @@ const ui = {
   coffeeBtn: el("coffeeBtn"), menuBtn: el("menuBtn"),
   winOverlay: el("winOverlay"), winTitle: el("winTitle"), winBurst: el("winBurst"),
   winCountry: el("winCountry"), winStats: el("winStats"), winAgain: el("winAgain"),
-  winMenu: el("winMenu"), winShare: el("winShare"), winSupport: el("winSupport"), dailyBtn: el("dailyBtn"),
+  winMenu: el("winMenu"), winShare: el("winShare"), winSupport: el("winSupport"),
+  // two-step menu
+  menuStep1: el("menuStep1"), menuStep2: el("menuStep2"), menuBack: el("menuBack"),
+  cardDaily: el("cardDaily"), cardFriends: el("cardFriends"), cardFree: el("cardFree"),
   hintBtn: el("hintBtn"), forfeitBtn: el("forfeitBtn"),
   hintBox: el("hintBox"), hintTag: el("hintTag"), hintText: el("hintText"),
   // multiplayer
-  mpBtn: el("mpBtn"),
   mpSetup: el("mpSetup"), mpSetupClose: el("mpSetupClose"), mpName: el("mpName"),
   mpCreate: el("mpCreate"), mpJoinForm: el("mpJoinForm"), mpCode: el("mpCode"), mpSetupMsg: el("mpSetupMsg"),
   mpLobby: el("mpLobby"), mpLobbyCode: el("mpLobbyCode"), mpCopyCode: el("mpCopyCode"),
@@ -316,7 +318,9 @@ function showMenu() {
   ui.input.disabled = false;
   ui.hintBtn.style.display = "";
   ui.forfeitBtn.style.display = "";
-  ui.mpBtn.hidden = !MULTIPLAYER_ENABLED;
+  ui.cardFriends.hidden = !MULTIPLAYER_ENABLED;
+  ui.menuStep1.hidden = false;
+  ui.menuStep2.hidden = true;
   if (globe) { render(); controls.autoRotate = true; controls.autoRotateSpeed = 0.7; globe.pointOfView({ altitude: 2.3 }, 1100); }
   ui.topBar.hidden = true;
   ui.inputBar.hidden = true;
@@ -606,8 +610,13 @@ ui.confirmStay.addEventListener("click", () => { ui.confirmLeave.hidden = true; 
 ui.confirmLeave.addEventListener("click", (e) => { if (e.target === ui.confirmLeave) ui.confirmLeave.hidden = true; });
 ui.confirmLeaveBtn.addEventListener("click", () => { ui.confirmLeave.hidden = true; state.online ? leaveMp() : showMenu(); });
 
+// two-step menu cards
+ui.cardDaily.addEventListener("click", startDaily);
+ui.cardFriends.addEventListener("click", openMpSetup);
+ui.cardFree.addEventListener("click", () => { ui.menuStep1.hidden = true; ui.menuStep2.hidden = false; });
+ui.menuBack.addEventListener("click", () => { ui.menuStep2.hidden = true; ui.menuStep1.hidden = false; });
+
 // multiplayer
-ui.mpBtn.addEventListener("click", openMpSetup);
 ui.mpSetupClose.addEventListener("click", () => { closeMpOverlays(); showMenu(); });
 ui.mpCreate.addEventListener("click", createLobby);
 ui.mpJoinForm.addEventListener("submit", (e) => { e.preventDefault(); joinLobby(ui.mpCode.value); });
@@ -626,7 +635,6 @@ ui.mpLobbyLeave.addEventListener("click", leaveMp);
 ui.mpBoardHead.addEventListener("click", () => ui.mpBoard.classList.toggle("collapsed"));
 ui.mpBackLobby.addEventListener("click", () => state.mp.socket?.send(JSON.stringify({ type: "again" })));
 ui.mpResultsLeave.addEventListener("click", leaveMp);
-ui.dailyBtn.addEventListener("click", startDaily);
 ui.winShare.addEventListener("click", shareResult);
 ui.feedHead.addEventListener("click", () => ui.feedPanel.classList.toggle("collapsed"));
 

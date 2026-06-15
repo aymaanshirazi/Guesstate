@@ -579,6 +579,48 @@ body.is-hard .fi-arrow { display: none; }
 @keyframes shimmer { to { background-position: -220% center; } }
 .menu-tagline { text-align: center; color: var(--txt-dim); font-size: 14px; margin: 8px 0 22px; line-height: 1.45; }
 .menu-tagline b { color: var(--accent-2); }
+/* card-based menu (two-step) */
+.menu-cards { display: flex; flex-direction: column; gap: 11px; margin-bottom: 18px; }
+.big-card {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-align: left;
+  border: 1px solid var(--panel-brd);
+  background: rgba(0, 0, 0, 0.26);
+  color: var(--txt);
+  padding: 16px;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: transform 0.14s ease, box-shadow 0.2s, border-color 0.2s, background 0.2s;
+}
+.big-card:hover { transform: translateY(-2px); }
+.big-card:active { transform: translateY(0); }
+.bc-emoji { font-size: 28px; flex: none; }
+.bc-text { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.bc-title { font-weight: 700; font-size: 16.5px; letter-spacing: 0.3px; }
+.bc-sub { font-size: 12px; color: var(--txt-dim); margin-top: 2px; }
+.bc-go { color: var(--txt-dim); font-size: 14px; flex: none; }
+#cardDaily { background: linear-gradient(100deg, rgba(255,207,92,0.13), rgba(255,138,60,0.08)); border-color: rgba(255,207,92,0.3); }
+#cardDaily:hover { border-color: var(--warn); box-shadow: 0 0 28px -8px var(--warn); }
+#cardDaily .bc-title { color: var(--warn); }
+#cardFriends { background: linear-gradient(100deg, rgba(0,224,198,0.13), rgba(77,124,255,0.08)); border-color: rgba(0,224,198,0.3); }
+#cardFriends:hover { border-color: var(--accent-2); box-shadow: 0 0 28px -8px var(--accent-2); }
+#cardFriends .bc-title { color: var(--accent-2); }
+#cardFree { background: linear-gradient(100deg, rgba(77,124,255,0.14), rgba(120,90,255,0.08)); border-color: rgba(77,124,255,0.32); }
+#cardFree:hover { border-color: var(--accent); box-shadow: 0 0 28px -8px var(--accent); }
+#cardFree .bc-title { color: #9db4ff; }
+
+.diff-inline { display: flex; align-items: center; gap: 12px; }
+.diff-label { font-family: "JetBrains Mono", monospace; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--txt-dim); flex: none; }
+.diff-inline .choice-row { flex: 1; }
+.diff-inline .choice { padding: 9px; font-size: 13px; }
+
+#menuStep2 { animation: riseIn 0.3s ease both; }
+.menu-back { display: block; margin: 12px auto 0; border: 0; background: transparent; color: var(--txt-dim); font-size: 13px; font-weight: 600; cursor: pointer; }
+.menu-back:hover { color: var(--txt); }
+
 /* daily challenge button */
 .daily-btn {
   width: 100%;

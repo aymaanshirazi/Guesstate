@@ -126,46 +126,48 @@
         </div>
         <p class="menu-tagline">A secret place is hidden on the globe. Every guess reveals how <b>close</b> you are.</p>
 
-        <button class="daily-btn" id="dailyBtn">
-          <span class="daily-emoji">🗓️</span>
-          <span class="daily-text">
-            <span class="daily-main">DAILY CHALLENGE</span>
-            <span class="daily-sub" id="dailySub">one shared puzzle, same for everyone</span>
-          </span>
-          <span class="daily-go">▶</span>
-        </button>
-        <button class="daily-btn mp-btn" id="mpBtn" hidden>
-          <span class="daily-emoji">👥</span>
-          <span class="daily-text">
-            <span class="daily-main">PLAY WITH FRIENDS</span>
-            <span class="daily-sub">create a lobby, race to guess first</span>
-          </span>
-          <span class="daily-go">▶</span>
-        </button>
-        <div class="menu-divider"><span>or free play</span></div>
+        <!-- STEP 1: pick how to play -->
+        <div id="menuStep1">
+          <div class="menu-cards">
+            <button class="big-card" id="cardDaily">
+              <span class="bc-emoji">🗓️</span>
+              <span class="bc-text"><span class="bc-title">Daily Challenge</span><span class="bc-sub">one shared puzzle, same for everyone</span></span>
+              <span class="bc-go">▶</span>
+            </button>
+            <button class="big-card" id="cardFriends" hidden>
+              <span class="bc-emoji">👥</span>
+              <span class="bc-text"><span class="bc-title">Play with Friends</span><span class="bc-sub">create a lobby, race to guess first</span></span>
+              <span class="bc-go">▶</span>
+            </button>
+            <button class="big-card" id="cardFree">
+              <span class="bc-emoji">🌐</span>
+              <span class="bc-text"><span class="bc-title">Free Play</span><span class="bc-sub">countries or cities, at your own pace</span></span>
+              <span class="bc-go">▶</span>
+            </button>
+          </div>
+          <div class="diff-inline">
+            <span class="diff-label">Difficulty</span>
+            <div class="choice-row" id="diffChoice">
+              <button class="choice is-active" data-diff="easy">😌 Easy</button>
+              <button class="choice" data-diff="hard">😤 Hard</button>
+            </div>
+          </div>
+        </div>
 
-        <div class="menu-section">
+        <!-- STEP 2: free play config -->
+        <div id="menuStep2" hidden>
           <div class="menu-label">What do you want to guess?</div>
           <div class="choice-row" id="modeChoice">
             <button class="choice is-active" data-mode="countries"><span class="choice-emoji">🌐</span> Countries</button>
             <button class="choice locked" data-mode="cities"><span class="choice-emoji">📍</span> Cities <span class="pro-badge" id="citiesProBadge">🔒 PRO</span></button>
           </div>
-        </div>
-
-        <div class="menu-section" id="countrySection" hidden>
-          <div class="menu-label">Which country's cities?</div>
-          <div class="choice-grid" id="countryChoice"></div>
-        </div>
-
-        <div class="menu-section">
-          <div class="menu-label">Difficulty</div>
-          <div class="choice-row" id="diffChoice">
-            <button class="choice is-active" data-diff="easy">😌 Easy <span class="choice-hint">shows direction</span></button>
-            <button class="choice" data-diff="hard">😤 Hard <span class="choice-hint">no direction</span></button>
+          <div class="menu-section" id="countrySection" hidden>
+            <div class="menu-label">Which country's cities?</div>
+            <div class="choice-grid" id="countryChoice"></div>
           </div>
+          <button class="play-btn" id="playBtn">▶ PLAY</button>
+          <button class="menu-back" id="menuBack">← Back</button>
         </div>
-
-        <button class="play-btn" id="playBtn">▶ PLAY</button>
 
         <div class="menu-foot">
           <a id="menuCoffee" href="#" target="_blank" rel="noopener noreferrer">☕ Support Guesstate</a>
