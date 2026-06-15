@@ -13,6 +13,15 @@ export const KOFI_SHOP_URL = "https://ko-fi.com/s/cc2ec980b2";
 
 export const PRO_PRICE = "$2.99";
 
+// Background lo-fi tracks. Drop ROYALTY-FREE / Creative Commons audio files in
+// public/music/ (e.g. from pixabay.com/music), then list them here. The 🎵 player
+// only appears when there's at least one track. Music never autoplays.
+//   e.g. { title: "Chill Sunset", file: "/music/chill-sunset.mp3" }
+export const MUSIC_TRACKS = [
+  // add your tracks here, e.g.:
+  // { title: "Chill Sunset", file: "/music/chill-sunset.mp3" },
+];
+
 // Your live game URL, used in the Daily share text.
 export const SITE_URL = "https://guesstate.com";
 

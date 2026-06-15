@@ -931,6 +931,44 @@ body.is-hard .fi-arrow { display: none; }
 }
 .confirm-stay:active, .confirm-leave:active { transform: scale(0.97); }
 
+/* ---------- music player ---------- */
+.music-panel {
+  position: fixed;
+  top: 74px;
+  right: 18px;
+  z-index: 4;
+  width: 220px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  animation: pop 0.25s ease both;
+}
+.music-row { display: flex; align-items: center; gap: 10px; }
+.music-toggle {
+  flex: none;
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  border: 0;
+  background: linear-gradient(180deg, var(--accent-2), #00b8a3);
+  color: #04130d;
+  font-size: 15px;
+  cursor: pointer;
+}
+.music-now { font-size: 13px; color: var(--txt); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.music-vol { width: 100%; accent-color: var(--accent-2); }
+.music-select {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.32);
+  border: 1px solid var(--panel-brd);
+  border-radius: 9px;
+  color: var(--txt);
+  font-family: "Geist", sans-serif;
+  font-size: 13px;
+  padding: 8px 10px;
+}
+@media (max-width: 720px) { .music-panel { top: 70px; right: 10px; left: 10px; width: auto; } }
+
 /* ---------- loading ---------- */
 .loading {
   position: fixed;

@@ -63,6 +63,7 @@
       </div>
       <div class="hud-top-right">
         <span class="game-readout" id="gameReadout"></span>
+        <button class="icon-btn" id="musicBtn" title="Music" hidden>🎵</button>
         <a class="coffee" id="coffeeBtn" href="#" target="_blank" rel="noopener noreferrer" title="Support Guesstate">
           <span class="coffee-emoji">☕</span>
           <span class="coffee-text">Coffee</span>
@@ -291,6 +292,16 @@
           <button class="confirm-leave" id="confirmLeaveBtn">Leave</button>
         </div>
       </div>
+    </div>
+
+    <!-- Music player popover -->
+    <div class="hud music-panel" id="musicPanel" hidden>
+      <div class="music-row">
+        <button class="music-toggle" id="musicToggle">▶</button>
+        <span class="music-now" id="musicNow">—</span>
+      </div>
+      <input class="music-vol" id="musicVol" type="range" min="0" max="1" step="0.05" value="0.5" aria-label="Volume" />
+      <select class="music-select" id="musicSelect"></select>
     </div>
 
     <div class="loading" id="loading"><div class="spinner"></div><span>Building the world…</span></div>

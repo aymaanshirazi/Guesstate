@@ -5,7 +5,7 @@ import "./style.css";
 import { ALIASES } from "./aliases.js";
 import { CITY_ALIASES } from "./cities.js";
 import { buildHints, buildCityHints } from "./hints.js";
-import { KOFI_URL, KOFI_SHOP_URL, PRO_PRICE, VALID_PRO_CODES, PRO_STORAGE_KEY, SITE_URL, PARTY_HOST, MULTIPLAYER_ENABLED } from "./config.js";
+import { KOFI_URL, KOFI_SHOP_URL, PRO_PRICE, VALID_PRO_CODES, PRO_STORAGE_KEY, SITE_URL, PARTY_HOST, MULTIPLAYER_ENABLED, MUSIC_TRACKS } from "./config.js";
 import { PartySocket } from "partysocket";
 
 /* ------------------------------------------------------------------ *
@@ -50,6 +50,9 @@ const ui = {
   mpBoard: el("mpBoard"), mpBoardHead: el("mpBoardHead"), mpBoardList: el("mpBoardList"),
   mpResults: el("mpResults"), mpAnswer: el("mpAnswer"), mpStandings: el("mpStandings"),
   mpAgain: el("mpAgain"), mpBackLobby: el("mpBackLobby"), mpResultsLeave: el("mpResultsLeave"),
+  // music
+  musicBtn: el("musicBtn"), musicPanel: el("musicPanel"), musicToggle: el("musicToggle"),
+  musicNow: el("musicNow"), musicVol: el("musicVol"), musicSelect: el("musicSelect"),
   // menu
   menu: el("menu"), modeChoice: el("modeChoice"), citiesProBadge: el("citiesProBadge"),
   countrySection: el("countrySection"), countryChoice: el("countryChoice"),
@@ -870,6 +873,36 @@ function leaveMp() {
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
+/* ---------------- background music ---------------- */
+const audio = new Audio();
+audio.loop = true;
+function initMusic() {
+  if (!MUSIC_TRACKS.length) return; // no tracks -> hide the button entirely
+  ui.musicBtn.hidden = false;
+  ui.musicSelect.innerHTML = MUSIC_TRACKS.map((t, i) => `<option value="${i}">${esc(t.title)}</option>`).join("");
+  const savedVol = parseFloat(localStorage.getItem("guesstate_music_vol"));
+  audio.volume = isNaN(savedVol) ? 0.5 : savedVol;
+  ui.musicVol.value = audio.volume;
+  const savedTrack = Math.min(MUSIC_TRACKS.length - 1, parseInt(localStorage.getItem("guesstate_music_track") || "0", 10));
+  loadTrack(savedTrack, false);
+
+  ui.musicBtn.addEventListener("click", () => { ui.musicPanel.hidden = !ui.musicPanel.hidden; });
+  ui.musicToggle.addEventListener("click", () => { audio.paused ? audio.play().catch(() => {}) : audio.pause(); });
+  ui.musicVol.addEventListener("input", () => { audio.volume = +ui.musicVol.value; localStorage.setItem("guesstate_music_vol", ui.musicVol.value); });
+  ui.musicSelect.addEventListener("change", () => loadTrack(+ui.musicSelect.value, !audio.paused));
+  audio.addEventListener("play", () => (ui.musicToggle.textContent = "⏸"));
+  audio.addEventListener("pause", () => (ui.musicToggle.textContent = "▶"));
+}
+function loadTrack(i, autoplay) {
+  const t = MUSIC_TRACKS[i];
+  if (!t) return;
+  audio.src = t.file;
+  ui.musicSelect.value = String(i);
+  ui.musicNow.textContent = t.title;
+  localStorage.setItem("guesstate_music_track", String(i));
+  if (autoplay) audio.play().catch(() => {});
+}
+
 /* ---------------- boot ---------------- */
 const CITY_TARGET_MIN_POP = 250000; // answers come from "well-known" cities only
 const CITY_TARGET_MIN_COUNT = 15;   // ...but ensure at least this many per country
@@ -1004,6 +1037,7 @@ async function boot() {
 
   setInterval(() => globe.arcsData(makeDecoArcs(20)), 10000);
 
+  initMusic();
   showMenu();
   ui.loading.classList.add("is-hidden");
   setTimeout(() => (ui.loading.hidden = true), 700);
