@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 140">
+  <defs>
+    <radialGradient id="glass" cx="40%" cy="35%" r="70%">
+      <stop offset="0%" stop-color="#cfeaff" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#7fb3ff" stop-opacity="0.18"/>
+    </radialGradient>
+  </defs>
+  <!-- arms -->
+  <rect x="20" y="88" width="17" height="32" rx="8.5" fill="#eef2fa" stroke="#c2ccde" stroke-width="2"/>
+  <rect x="83" y="88" width="17" height="32" rx="8.5" fill="#eef2fa" stroke="#c2ccde" stroke-width="2"/>
+  <!-- body / suit -->
+  <rect x="33" y="84" width="54" height="46" rx="24" fill="#eef2fa" stroke="#c2ccde" stroke-width="2"/>
+  <rect x="49" y="100" width="22" height="15" rx="3.5" fill="#0a1024"/>
+  <circle cx="55" cy="107.5" r="2.4" fill="#2ee6a6"/>
+  <circle cx="62" cy="107.5" r="2.4" fill="#ffcf5c"/>
+  <circle cx="69" cy="107.5" r="2.4" fill="#4d7cff"/>
+  <!-- ears -->
+  <path d="M37 33 L45 14 L56 30 Z" fill="#9aa7bf"/>
+  <path d="M83 33 L75 14 L64 30 Z" fill="#9aa7bf"/>
+  <path d="M42 31 L46.5 20 L52 30 Z" fill="#f5b8c4"/>
+  <path d="M78 31 L73.5 20 L68 30 Z" fill="#f5b8c4"/>
+  <!-- helmet glass -->
+  <circle cx="60" cy="52" r="42" fill="url(#glass)"/>
+  <!-- cat head -->
+  <circle cx="60" cy="56" r="27" fill="#bcc7da"/>
+  <ellipse cx="50" cy="53" rx="6.2" ry="8.4" fill="#1a1f2e"/>
+  <ellipse cx="70" cy="53" rx="6.2" ry="8.4" fill="#1a1f2e"/>
+  <circle cx="52.2" cy="49.6" r="2.1" fill="#fff"/>
+  <circle cx="72.2" cy="49.6" r="2.1" fill="#fff"/>
+  <path d="M56.5 61 L63.5 61 L60 65.5 Z" fill="#f5969f"/>
+  <path d="M60 65.5 Q55 70.5 50 66 M60 65.5 Q65 70.5 70 66" stroke="#1a1f2e" stroke-width="1.7" fill="none" stroke-linecap="round"/>
+  <g stroke="#e7edf7" stroke-width="1.5" stroke-linecap="round">
+    <line x1="34" y1="59" x2="47" y2="61"/><line x1="34" y1="65" x2="47" y2="65"/>
+    <line x1="86" y1="59" x2="73" y2="61"/><line x1="86" y1="65" x2="73" y2="65"/>
+  </g>
+  <!-- helmet ring + highlight -->
+  <circle cx="60" cy="52" r="42" fill="none" stroke="#eef2fa" stroke-width="6"/>
+  <circle cx="60" cy="52" r="42" fill="none" stroke="#9fc6ff" stroke-width="1.4"/>
+  <path d="M38 38 Q47 26 62 25" stroke="#ffffff" stroke-width="4.5" fill="none" opacity="0.6" stroke-linecap="round"/>
+</svg>

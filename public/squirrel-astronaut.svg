@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 140">
+  <defs>
+    <radialGradient id="glassS" cx="40%" cy="35%" r="70%">
+      <stop offset="0%" stop-color="#cfeaff" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#7fb3ff" stop-opacity="0.18"/>
+    </radialGradient>
+  </defs>
+  <!-- bushy tail -->
+  <path d="M96 128 Q138 112 126 64 Q120 36 96 42 Q116 58 106 90 Q100 112 80 116 Z" fill="#c8772e"/>
+  <path d="M99 120 Q128 106 118 68 Q113 48 99 50 Q113 64 105 92 Q100 108 86 112 Z" fill="#e2a45c"/>
+  <!-- arms -->
+  <rect x="30" y="88" width="16" height="32" rx="8" fill="#eef2fa" stroke="#c2ccde" stroke-width="2"/>
+  <rect x="86" y="88" width="16" height="32" rx="8" fill="#eef2fa" stroke="#c2ccde" stroke-width="2"/>
+  <!-- body / suit -->
+  <rect x="40" y="84" width="54" height="46" rx="24" fill="#eef2fa" stroke="#c2ccde" stroke-width="2"/>
+  <rect x="56" y="100" width="22" height="15" rx="3.5" fill="#0a1024"/>
+  <circle cx="62" cy="107.5" r="2.4" fill="#ffcf5c"/>
+  <circle cx="69" cy="107.5" r="2.4" fill="#2ee6a6"/>
+  <circle cx="76" cy="107.5" r="2.4" fill="#ff8a3c"/>
+  <!-- ears (round, tufted) -->
+  <circle cx="49" cy="30" r="11" fill="#c8772e"/>
+  <circle cx="87" cy="30" r="11" fill="#c8772e"/>
+  <circle cx="49" cy="31" r="5.5" fill="#e2a45c"/>
+  <circle cx="87" cy="31" r="5.5" fill="#e2a45c"/>
+  <!-- helmet glass -->
+  <circle cx="68" cy="52" r="42" fill="url(#glassS)"/>
+  <!-- squirrel head -->
+  <circle cx="68" cy="55" r="27" fill="#cf8338"/>
+  <ellipse cx="60" cy="71" rx="13" ry="11" fill="#f0d6b0"/>
+  <!-- eyes -->
+  <ellipse cx="58" cy="50" rx="6.2" ry="8.2" fill="#1a1f2e"/>
+  <ellipse cx="78" cy="50" rx="6.2" ry="8.2" fill="#1a1f2e"/>
+  <circle cx="60.2" cy="46.8" r="2.1" fill="#fff"/>
+  <circle cx="80.2" cy="46.8" r="2.1" fill="#fff"/>
+  <!-- nose + buck teeth -->
+  <ellipse cx="68" cy="62" rx="3.2" ry="2.4" fill="#1a1f2e"/>
+  <rect x="64.5" y="66" width="3.2" height="6" rx="1" fill="#fff" stroke="#cbb48f" stroke-width="0.6"/>
+  <rect x="68.3" y="66" width="3.2" height="6" rx="1" fill="#fff" stroke="#cbb48f" stroke-width="0.6"/>
+  <!-- helmet ring + highlight -->
+  <circle cx="68" cy="52" r="42" fill="none" stroke="#eef2fa" stroke-width="6"/>
+  <circle cx="68" cy="52" r="42" fill="none" stroke="#9fc6ff" stroke-width="1.4"/>
+  <path d="M46 38 Q55 26 70 25" stroke="#ffffff" stroke-width="4.5" fill="none" opacity="0.6" stroke-linecap="round"/>
+</svg>

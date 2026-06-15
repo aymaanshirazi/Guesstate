@@ -5,7 +5,7 @@ import "./style.css";
 import { ALIASES } from "./aliases.js";
 import { CITY_ALIASES } from "./cities.js";
 import { buildHints, buildCityHints } from "./hints.js";
-import { KOFI_URL, KOFI_SHOP_URL, PRO_PRICE, VALID_PRO_CODES, PRO_STORAGE_KEY, SITE_URL, PARTY_HOST, MULTIPLAYER_ENABLED, MUSIC_TRACKS } from "./config.js";
+import { KOFI_URL, KOFI_SHOP_URL, PRO_PRICE, VALID_PRO_CODES, PRO_STORAGE_KEY, SITE_URL, PARTY_HOST, MULTIPLAYER_ENABLED } from "./config.js";
 import { PartySocket } from "partysocket";
 
 /* ------------------------------------------------------------------ *
@@ -50,6 +50,8 @@ const ui = {
   mpBoard: el("mpBoard"), mpBoardHead: el("mpBoardHead"), mpBoardList: el("mpBoardList"),
   mpResults: el("mpResults"), mpAnswer: el("mpAnswer"), mpStandings: el("mpStandings"),
   mpAgain: el("mpAgain"), mpBackLobby: el("mpBackLobby"), mpResultsLeave: el("mpResultsLeave"),
+  // mascot
+  mascot: el("mascot"), mascotBubble: el("mascotBubble"), mascotImg: el("mascotImg"),
   // music
   musicBtn: el("musicBtn"), musicPanel: el("musicPanel"), musicToggle: el("musicToggle"),
   musicNow: el("musicNow"), musicVol: el("musicVol"), musicSelect: el("musicSelect"),
@@ -186,6 +188,7 @@ function applyGuess(country, km, brng = null) {
   updateClosest();
   if (!state.online) ui.feedPanel.hidden = false;
   ui.closestPanel.hidden = false;
+  reactToGuess(p, km === 0);
 }
 
 function commitGuess(country) {
@@ -285,6 +288,8 @@ function newGame() {
   ui.hint.textContent = "";
   ui.input.value = "";
   ui.input.focus();
+  ui.mascot.hidden = false;
+  ui.mascotBubble.hidden = true;
   render();
   // frame the playing field
   if (state.gameType === "cities") {
@@ -306,6 +311,8 @@ function showMenu() {
   if (state.mp.socket) { try { state.mp.socket.close(); } catch {} state.mp.socket = null; }
   closeMpOverlays();
   ui.mpBoard.hidden = true;
+  ui.mascot.hidden = true;
+  ui.mascotBubble.hidden = true;
   ui.input.disabled = false;
   ui.hintBtn.style.display = "";
   ui.forfeitBtn.style.display = "";
@@ -684,7 +691,7 @@ function addOrbiters() {
   const scene = globe.scene();
   const group = new Group();
   group.rotation.x = 0.4;
-  const emojis = ["🐿️", "🐱", "🧑‍🚀", "🚀", "🛸", "🪐", "🛰️"];
+  const emojis = ["🚀", "🛸", "🪐", "🛰️", "☄️"];
   const R = 128;
   emojis.forEach((e, i) => {
     const sp = makeEmojiSprite(e);
@@ -818,6 +825,8 @@ function enterMpPlay() {
   ui.inputBar.hidden = false;
   ui.mpBoard.hidden = false;
   ui.mpBoard.classList.remove("collapsed");
+  ui.mascot.hidden = false;
+  ui.mascotBubble.hidden = true;
   if (controls) controls.autoRotate = false;
   render();
   globe.pointOfView({ lat: 20, lng: 0, altitude: camAlt(2.5) }, 1000);
@@ -873,34 +882,159 @@ function leaveMp() {
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
-/* ---------------- background music ---------------- */
-const audio = new Audio();
-audio.loop = true;
+/* ---------------- mascot (hardcoded comical reactions) ---------------- */
+const MASCOT = {
+  cat: "/cat-astronaut.svg",
+  squirrel: "/squirrel-astronaut.svg",
+};
+const LINES = {
+  far: [
+    ["squirrel", "That's nuts! 🥜 Way off, buddy."],
+    ["cat", "Brrr. Ice cold. 🧊"],
+    ["squirrel", "Were you even aiming? 😹"],
+    ["cat", "Cold. Like my heart before breakfast."],
+    ["squirrel", "Different continent vibes, friend."],
+  ],
+  mid: [
+    ["cat", "Getting warmer… 👀"],
+    ["squirrel", "Ooh, you're onto something!"],
+    ["cat", "Lukewarm. Keep going."],
+    ["squirrel", "Warmer! My tail's tingling."],
+  ],
+  close: [
+    ["squirrel", "SO close I can smell it! 👃"],
+    ["cat", "Hot hot hot! 🔥"],
+    ["squirrel", "You're basically there!"],
+    ["cat", "One more nudge, human."],
+  ],
+  solved: [
+    ["squirrel", "NAILED IT! 🎉 Nuts for you!"],
+    ["cat", "Purrfect. 😼"],
+    ["squirrel", "Knew you had it in you!"],
+  ],
+  idle: [
+    ["cat", "I bet it's somewhere with good fish… 🐟"],
+    ["squirrel", "My money's on somewhere with trees. 🌳"],
+    ["cat", "Spinning the globe makes me dizzy. 🌀"],
+    ["squirrel", "Is it nap o'clock yet?"],
+    ["cat", "Psst… try a country you forgot exists."],
+  ],
+};
+let mascotTimer, mascotIdleAt = 0;
+function sayMascot(text, who) {
+  if (ui.mascot.hidden) return;
+  ui.mascotImg.src = MASCOT[who] || MASCOT.cat;
+  ui.mascotBubble.textContent = text;
+  ui.mascotBubble.hidden = false;
+  mascotIdleAt = Date.now();
+  clearTimeout(mascotTimer);
+  mascotTimer = setTimeout(() => (ui.mascotBubble.hidden = true), 3600);
+}
+function sayFrom(bucket) {
+  const arr = LINES[bucket]; const [who, text] = arr[Math.floor(Math.random() * arr.length)];
+  sayMascot(text, who);
+}
+function reactToGuess(p, solved) {
+  if (solved) return sayFrom("solved");
+  if (p < 0.34) sayFrom("far");
+  else if (p < 0.7) sayFrom("mid");
+  else sayFrom("close");
+}
+setInterval(() => {
+  if (!ui.mascot.hidden && Date.now() - mascotIdleAt > 16000) sayFrom("idle");
+}, 6000);
+
+/* ---------------- background music (generated in-browser, copyright-free) ---------------- */
+const lofi = {
+  ctx: null, master: null, filter: null, playing: false, mood: 0, bar: 0, timer: null, nextTime: 0,
+  moods: [
+    { name: "Lo-fi Chill", bpm: 72, cutoff: 1200, chords: [[60, 64, 67, 71], [57, 60, 64, 67], [62, 65, 69, 72], [55, 59, 62, 65]] },
+    { name: "Sleepy", bpm: 58, cutoff: 820, chords: [[57, 60, 64], [53, 57, 60], [55, 59, 62], [52, 55, 59]] },
+    { name: "Focus", bpm: 84, cutoff: 1500, chords: [[60, 63, 67], [58, 62, 65], [56, 60, 63], [55, 59, 62]] },
+  ],
+  init() {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    this.ctx = new AC();
+    this.master = this.ctx.createGain();
+    this.filter = this.ctx.createBiquadFilter();
+    this.filter.type = "lowpass";
+    this.filter.frequency.value = this.moods[this.mood].cutoff;
+    this.filter.connect(this.master);
+    this.master.connect(this.ctx.destination);
+    this.crackle();
+  },
+  crackle() { // soft vinyl hiss
+    const len = this.ctx.sampleRate * 2, buf = this.ctx.createBuffer(1, len, this.ctx.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (Math.random() < 0.0007 ? 1 : 0.04);
+    const s = this.ctx.createBufferSource(); s.buffer = buf; s.loop = true;
+    const hp = this.ctx.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 2200;
+    const g = this.ctx.createGain(); g.gain.value = 0.05;
+    s.connect(hp); hp.connect(g); g.connect(this.master); s.start();
+  },
+  freq: (m) => 440 * Math.pow(2, (m - 69) / 12),
+  voice(m, t, dur, type, gain) {
+    const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+    o.type = type; o.frequency.value = this.freq(m);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(gain, t + 0.1); g.gain.linearRampToValueAtTime(0, t + dur);
+    o.connect(g); g.connect(this.filter); o.start(t); o.stop(t + dur + 0.05);
+  },
+  kick(t) {
+    const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+    o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(45, t + 0.12);
+    g.gain.setValueAtTime(0.5, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+    o.connect(g); g.connect(this.master); o.start(t); o.stop(t + 0.2);
+  },
+  hat(t) {
+    const len = this.ctx.sampleRate * 0.05, buf = this.ctx.createBuffer(1, len, this.ctx.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+    const s = this.ctx.createBufferSource(); s.buffer = buf;
+    const hp = this.ctx.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 7000;
+    const g = this.ctx.createGain(); g.gain.setValueAtTime(0.07, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+    s.connect(hp); hp.connect(g); g.connect(this.master); s.start(t);
+  },
+  scheduleBar(t) {
+    const m = this.moods[this.mood], chord = m.chords[this.bar % m.chords.length];
+    const beat = 60 / m.bpm, bar = beat * 4;
+    chord.forEach((n) => this.voice(n, t, bar * 0.96, "triangle", 0.09));   // pad
+    this.voice(chord[0] - 12, t, bar * 0.9, "sine", 0.16);                  // bass
+    this.kick(t); this.kick(t + beat * 2);                                  // kick 1 & 3
+    this.hat(t + beat); this.hat(t + beat * 3);                             // hat 2 & 4
+    this.bar++;
+    return bar;
+  },
+  loop() { while (this.nextTime < this.ctx.currentTime + 0.4) this.nextTime += this.scheduleBar(this.nextTime); },
+  start() {
+    if (!this.ctx) this.init();
+    if (this.ctx.state === "suspended") this.ctx.resume();
+    if (this.playing) return;
+    this.playing = true;
+    this.nextTime = this.ctx.currentTime + 0.1;
+    this.timer = setInterval(() => this.loop(), 60);
+  },
+  stop() { this.playing = false; clearInterval(this.timer); },
+  setVol(v) { if (this.master) this.master.gain.value = v; },
+  setMood(i) { this.mood = i; this.bar = 0; if (this.filter) this.filter.frequency.value = this.moods[i].cutoff; },
+};
+
 function initMusic() {
-  if (!MUSIC_TRACKS.length) return; // no tracks -> hide the button entirely
-  ui.musicBtn.hidden = false;
-  ui.musicSelect.innerHTML = MUSIC_TRACKS.map((t, i) => `<option value="${i}">${esc(t.title)}</option>`).join("");
-  const savedVol = parseFloat(localStorage.getItem("guesstate_music_vol"));
-  audio.volume = isNaN(savedVol) ? 0.5 : savedVol;
-  ui.musicVol.value = audio.volume;
-  const savedTrack = Math.min(MUSIC_TRACKS.length - 1, parseInt(localStorage.getItem("guesstate_music_track") || "0", 10));
-  loadTrack(savedTrack, false);
+  ui.musicBtn.hidden = false; // generated music is always available, no files needed
+  ui.musicSelect.innerHTML = lofi.moods.map((m, i) => `<option value="${i}">${esc(m.name)}</option>`).join("");
+  const vol = parseFloat(localStorage.getItem("guesstate_music_vol"));
+  const v = isNaN(vol) ? 0.45 : vol;
+  ui.musicVol.value = v; lofi.setVol(v);
+  const mood = Math.min(lofi.moods.length - 1, parseInt(localStorage.getItem("guesstate_music_mood") || "0", 10));
+  lofi.setMood(mood); ui.musicSelect.value = String(mood); ui.musicNow.textContent = lofi.moods[mood].name;
 
   ui.musicBtn.addEventListener("click", () => { ui.musicPanel.hidden = !ui.musicPanel.hidden; });
-  ui.musicToggle.addEventListener("click", () => { audio.paused ? audio.play().catch(() => {}) : audio.pause(); });
-  ui.musicVol.addEventListener("input", () => { audio.volume = +ui.musicVol.value; localStorage.setItem("guesstate_music_vol", ui.musicVol.value); });
-  ui.musicSelect.addEventListener("change", () => loadTrack(+ui.musicSelect.value, !audio.paused));
-  audio.addEventListener("play", () => (ui.musicToggle.textContent = "⏸"));
-  audio.addEventListener("pause", () => (ui.musicToggle.textContent = "▶"));
-}
-function loadTrack(i, autoplay) {
-  const t = MUSIC_TRACKS[i];
-  if (!t) return;
-  audio.src = t.file;
-  ui.musicSelect.value = String(i);
-  ui.musicNow.textContent = t.title;
-  localStorage.setItem("guesstate_music_track", String(i));
-  if (autoplay) audio.play().catch(() => {});
+  ui.musicToggle.addEventListener("click", () => {
+    if (lofi.playing) { lofi.stop(); ui.musicToggle.textContent = "▶"; }
+    else { lofi.setVol(+ui.musicVol.value); lofi.start(); ui.musicToggle.textContent = "⏸"; }
+  });
+  ui.musicVol.addEventListener("input", () => { lofi.setVol(+ui.musicVol.value); localStorage.setItem("guesstate_music_vol", ui.musicVol.value); });
+  ui.musicSelect.addEventListener("change", () => {
+    lofi.setMood(+ui.musicSelect.value); ui.musicNow.textContent = lofi.moods[+ui.musicSelect.value].name;
+    localStorage.setItem("guesstate_music_mood", ui.musicSelect.value);
+  });
 }
 
 /* ---------------- boot ---------------- */

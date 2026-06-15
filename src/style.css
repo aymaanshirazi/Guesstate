@@ -931,6 +931,45 @@ body.is-hard .fi-arrow { display: none; }
 }
 .confirm-stay:active, .confirm-leave:active { transform: scale(0.97); }
 
+/* ---------- mascot ---------- */
+.mascot {
+  position: fixed;
+  left: 14px;
+  bottom: 150px;
+  z-index: 3;
+  width: 72px;
+  pointer-events: none;
+  animation: floaty 4s ease-in-out infinite;
+}
+.mascot-img { width: 72px; height: auto; display: block; filter: drop-shadow(0 6px 14px rgba(0,0,0,0.5)); }
+@keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+.mascot-bubble {
+  position: absolute;
+  left: 56px;
+  bottom: 44px;
+  min-width: 120px;
+  max-width: 200px;
+  background: var(--panel);
+  border: 1px solid var(--panel-brd);
+  box-shadow: var(--shadow-1);
+  color: var(--txt);
+  font-size: 13px;
+  line-height: 1.35;
+  padding: 9px 12px;
+  border-radius: 13px;
+  border-bottom-left-radius: 3px;
+  backdrop-filter: blur(10px);
+  animation: pop 0.2s ease both;
+}
+.mascot-bubble::after {
+  content: "";
+  position: absolute;
+  left: -7px; bottom: 8px;
+  border: 6px solid transparent;
+  border-right-color: var(--panel-brd);
+}
+@media (max-width: 720px) { .mascot { width: 58px; bottom: 200px; left: 8px; } .mascot-img { width: 58px; } .mascot-bubble { left: 46px; max-width: 160px; font-size: 12px; } }
+
 /* ---------- music player ---------- */
 .music-panel {
   position: fixed;
