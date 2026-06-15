@@ -681,7 +681,7 @@ function addOrbiters() {
   const scene = globe.scene();
   const group = new Group();
   group.rotation.x = 0.4;
-  const emojis = ["🚀", "🛰️", "🛸", "🎈", "🪐", "✈️"];
+  const emojis = ["🐿️", "🐱", "🧑‍🚀", "🚀", "🛸", "🪐", "🛰️"];
   const R = 128;
   emojis.forEach((e, i) => {
     const sp = makeEmojiSprite(e);
@@ -961,7 +961,7 @@ async function boot() {
     .arcsTransitionDuration(0)
     .arcsData(makeDecoArcs(20))
     .labelLat((d) => d.lat).labelLng((d) => d.lng).labelText((d) => d.name)
-    .labelColor((d) => d.color).labelDotRadius(0.22).labelSize(0.9)
+    .labelColor((d) => d.color).labelDotRadius(0.28).labelSize(1.5)
     .labelResolution(2).labelAltitude(0.04).labelsTransitionDuration(300)
     .labelsData([]);
 
