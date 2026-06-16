@@ -15,14 +15,21 @@
   <circle cx="62" cy="107.5" r="2.4" fill="#ffcf5c"/>
   <circle cx="69" cy="107.5" r="2.4" fill="#4d7cff"/>
   <!-- ears -->
-  <path d="M37 33 L45 14 L56 30 Z" fill="#9aa7bf"/>
-  <path d="M83 33 L75 14 L64 30 Z" fill="#9aa7bf"/>
+  <path d="M37 33 L45 14 L56 30 Z" fill="#d2802f"/>
+  <path d="M83 33 L75 14 L64 30 Z" fill="#d2802f"/>
   <path d="M42 31 L46.5 20 L52 30 Z" fill="#f5b8c4"/>
   <path d="M78 31 L73.5 20 L68 30 Z" fill="#f5b8c4"/>
   <!-- helmet glass -->
   <circle cx="60" cy="52" r="42" fill="url(#glass)"/>
-  <!-- cat head -->
-  <circle cx="60" cy="56" r="27" fill="#bcc7da"/>
+  <!-- cat head (ginger) -->
+  <circle cx="60" cy="56" r="27" fill="#f0a24a"/>
+  <!-- muzzle + tabby stripes -->
+  <ellipse cx="60" cy="62" rx="15" ry="12" fill="#f7c184"/>
+  <g stroke="#d2802f" stroke-width="2.4" stroke-linecap="round">
+    <line x1="60" y1="30" x2="60" y2="38"/>
+    <line x1="52" y1="31" x2="54" y2="39"/>
+    <line x1="68" y1="31" x2="66" y2="39"/>
+  </g>
   <ellipse cx="50" cy="53" rx="6.2" ry="8.4" fill="#1a1f2e"/>
   <ellipse cx="70" cy="53" rx="6.2" ry="8.4" fill="#1a1f2e"/>
   <circle cx="52.2" cy="49.6" r="2.1" fill="#fff"/>

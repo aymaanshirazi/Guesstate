@@ -290,7 +290,7 @@ function newGame() {
   ui.hint.textContent = "";
   ui.input.value = "";
   ui.input.focus();
-  ui.mascot.hidden = false;
+  ui.mascot.hidden = true;
   ui.mascotBubble.hidden = true;
   render();
   // frame the playing field
@@ -502,11 +502,11 @@ function renderLabels() {
   const cities = state.gameType === "cities";
   const labels = [...state.guessed.values()].map((g) => ({
     lat: g.country.lat, lng: g.country.lng, name: g.country.name,
-    color: g.country === state.target ? "#2ee6a6" : (cities ? heatColor(g.proximity, 1) : "rgba(255,255,255,0.96)"),
+    color: g.country === state.target ? "#7dffce" : (cities ? heatColor(g.proximity, 1) : "#ffffff"),
   }));
   // reveal the answer's label at the end (won/forfeit/round-over)
   if (state.solved && state.target && state.target.lat != null && !state.guessed.has(state.target.name)) {
-    labels.push({ lat: state.target.lat, lng: state.target.lng, name: state.target.name, color: "#2ee6a6" });
+    labels.push({ lat: state.target.lat, lng: state.target.lng, name: state.target.name, color: "#7dffce" });
   }
   globe.labelsData(labels);
 }
@@ -693,20 +693,42 @@ function makeEmojiSprite(emoji) {
   const mat = new SpriteMaterial({ map: tex, transparent: true, opacity: 0.8, depthWrite: false });
   return new Sprite(mat);
 }
+/* sprite from an SVG/image url (used for the cat & squirrel astronauts) */
+function makeImageSprite(url) {
+  const c = document.createElement("canvas"); c.width = c.height = 256;
+  const tex = new CanvasTexture(c);
+  const img = new Image();
+  img.onload = () => {
+    const ctx = c.getContext("2d");
+    const ar = img.width / img.height; let w = 256, h = 256;
+    if (ar > 1) h = 256 / ar; else w = 256 * ar;
+    ctx.clearRect(0, 0, 256, 256);
+    ctx.drawImage(img, (256 - w) / 2, (256 - h) / 2, w, h);
+    tex.needsUpdate = true;
+  };
+  img.src = url;
+  const mat = new SpriteMaterial({ map: tex, transparent: true, opacity: 0.95, depthWrite: false });
+  return new Sprite(mat);
+}
 
-/* comical objects that slowly orbit behind the globe */
+/* comical critters + space objects that slowly orbit the globe */
 function addOrbiters() {
   const scene = globe.scene();
   const group = new Group();
   group.rotation.x = 0.4;
-  const emojis = ["🚀", "🛸", "🪐", "🛰️", "☄️"];
-  const R = 128;
-  emojis.forEach((e, i) => {
-    const sp = makeEmojiSprite(e);
-    const phi = Math.acos(1 - 2 * (i + 0.5) / emojis.length);
+  const items = [
+    { sp: makeImageSprite("/cat-astronaut.svg"), s: 17 },
+    { sp: makeImageSprite("/squirrel-astronaut.svg"), s: 18 },
+    { sp: makeEmojiSprite("🚀"), s: 11 },
+    { sp: makeEmojiSprite("🛸"), s: 11 },
+    { sp: makeEmojiSprite("🪐"), s: 12 },
+    { sp: makeEmojiSprite("🛰️"), s: 10 },
+  ];
+  const R = 130;
+  items.forEach(({ sp, s }, i) => {
+    const phi = Math.acos(1 - 2 * (i + 0.5) / items.length);
     const theta = Math.PI * (1 + Math.sqrt(5)) * i;
     sp.position.set(R * Math.sin(phi) * Math.cos(theta), R * Math.cos(phi), R * Math.sin(phi) * Math.sin(theta));
-    const s = 9 + Math.random() * 4;
     sp.scale.set(s, s, 1);
     group.add(sp);
   });
@@ -833,7 +855,7 @@ function enterMpPlay() {
   ui.inputBar.hidden = false;
   ui.mpBoard.hidden = false;
   ui.mpBoard.classList.remove("collapsed");
-  ui.mascot.hidden = false;
+  ui.mascot.hidden = true;
   ui.mascotBubble.hidden = true;
   if (controls) controls.autoRotate = false;
   render();
@@ -928,15 +950,18 @@ const LINES = {
     ["cat", "Psst… try a country you forgot exists."],
   ],
 };
+/* The cat & squirrel orbit the globe (see addOrbiters). When they have something
+ * to say, a small transient toast pops in the corner with the speaker + line. */
 let mascotTimer, mascotIdleAt = 0;
 function sayMascot(text, who) {
-  if (ui.mascot.hidden) return;
+  if (ui.inputBar.hidden) return; // only during play
   ui.mascotImg.src = MASCOT[who] || MASCOT.cat;
   ui.mascotBubble.textContent = text;
   ui.mascotBubble.hidden = false;
+  ui.mascot.hidden = false;
   mascotIdleAt = Date.now();
   clearTimeout(mascotTimer);
-  mascotTimer = setTimeout(() => (ui.mascotBubble.hidden = true), 3600);
+  mascotTimer = setTimeout(() => { ui.mascotBubble.hidden = true; ui.mascot.hidden = true; }, 4200);
 }
 function sayFrom(bucket) {
   const arr = LINES[bucket]; const [who, text] = arr[Math.floor(Math.random() * arr.length)];
@@ -949,7 +974,7 @@ function reactToGuess(p, solved) {
   else sayFrom("close");
 }
 setInterval(() => {
-  if (!ui.mascot.hidden && Date.now() - mascotIdleAt > 16000) sayFrom("idle");
+  if (!ui.inputBar.hidden && Date.now() - mascotIdleAt > 18000) sayFrom("idle");
 }, 6000);
 
 /* ---------------- background music (generated in-browser, copyright-free) ---------------- */
@@ -1135,9 +1160,10 @@ async function boot() {
     .arcDashAnimateTime((d) => d.speed)
     .arcsTransitionDuration(0)
     .arcsData(makeDecoArcs(20))
+    // place labels on the globe
     .labelLat((d) => d.lat).labelLng((d) => d.lng).labelText((d) => d.name)
-    .labelColor((d) => d.color).labelDotRadius(0.28).labelSize(1.5)
-    .labelResolution(2).labelAltitude(0.04).labelsTransitionDuration(300)
+    .labelColor((d) => d.color).labelDotRadius(0.3).labelSize(1.9)
+    .labelResolution(3).labelAltitude(0.04).labelsTransitionDuration(250)
     .labelsData([]);
 
   const mat = globe.globeMaterial();
