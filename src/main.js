@@ -1,5 +1,5 @@
 import Globe from "globe.gl";
-import { Color, Group, Sprite, SpriteMaterial, CanvasTexture } from "three";
+import { Color, Group, Sprite, SpriteMaterial, CanvasTexture, Vector3 } from "three";
 import { geoCentroid } from "d3-geo";
 import "./style.css";
 import { ALIASES } from "./aliases.js";
@@ -53,7 +53,7 @@ const ui = {
   mpResults: el("mpResults"), mpAnswer: el("mpAnswer"), mpStandings: el("mpStandings"),
   mpAgain: el("mpAgain"), mpBackLobby: el("mpBackLobby"), mpResultsLeave: el("mpResultsLeave"),
   // mascot
-  mascot: el("mascot"), mascotBubble: el("mascotBubble"), mascotImg: el("mascotImg"),
+  mascot: el("mascot"), mascotBubble: el("mascotBubble"),
   // music
   musicBtn: el("musicBtn"), musicPanel: el("musicPanel"), musicToggle: el("musicToggle"),
   musicNow: el("musicNow"), musicVol: el("musicVol"), musicSelect: el("musicSelect"),
@@ -716,9 +716,11 @@ function addOrbiters() {
   const scene = globe.scene();
   const group = new Group();
   group.rotation.x = 0.4;
+  orbiterSprites.cat = makeImageSprite("/cat-astronaut.svg");
+  orbiterSprites.squirrel = makeImageSprite("/squirrel-astronaut.svg");
   const items = [
-    { sp: makeImageSprite("/cat-astronaut.svg"), s: 17 },
-    { sp: makeImageSprite("/squirrel-astronaut.svg"), s: 18 },
+    { sp: orbiterSprites.cat, s: 17 },
+    { sp: orbiterSprites.squirrel, s: 18 },
     { sp: makeEmojiSprite("🚀"), s: 11 },
     { sp: makeEmojiSprite("🛸"), s: 11 },
     { sp: makeEmojiSprite("🪐"), s: 12 },
@@ -733,7 +735,7 @@ function addOrbiters() {
     group.add(sp);
   });
   scene.add(group);
-  const tick = () => { group.rotation.y += 0.0011; requestAnimationFrame(tick); };
+  const tick = () => { group.rotation.y += 0.0011; updateSpeechPosition(); requestAnimationFrame(tick); };
   tick();
 }
 
@@ -919,49 +921,60 @@ const MASCOT = {
 };
 const LINES = {
   far: [
-    ["squirrel", "That's nuts! 🥜 Way off, buddy."],
-    ["cat", "Brrr. Ice cold. 🧊"],
-    ["squirrel", "Were you even aiming? 😹"],
-    ["cat", "Cold. Like my heart before breakfast."],
-    ["squirrel", "Different continent vibes, friend."],
+    ["squirrel", "That's nuts. And not the good kind. 🥜"],
+    ["cat", "Colder than the dev's third coffee. ☕"],
+    ["squirrel", "Bold guess. Confidently incorrect."],
+    ["cat", "I'm a cat in a fishbowl and even I know that's wrong."],
+    ["squirrel", "Map? Or magic 8-ball?"],
+    ["cat", "The globe felt that. It's offended now."],
   ],
   mid: [
-    ["cat", "Getting warmer… 👀"],
-    ["squirrel", "Ooh, you're onto something!"],
-    ["cat", "Lukewarm. Keep going."],
-    ["squirrel", "Warmer! My tail's tingling."],
+    ["cat", "Warmer. Don't let it go to your head."],
+    ["squirrel", "Ooh, a flicker of competence! ✨"],
+    ["cat", "Getting toasty. Like my nap spot."],
+    ["squirrel", "The hardcoded 'warmer' line approves."],
   ],
   close: [
-    ["squirrel", "SO close I can smell it! 👃"],
-    ["cat", "Hot hot hot! 🔥"],
-    ["squirrel", "You're basically there!"],
-    ["cat", "One more nudge, human."],
+    ["squirrel", "SO close my tail's doing the thing! 🐿️"],
+    ["cat", "Hot! The globe is basically blushing."],
+    ["squirrel", "Practically there. Don't lick the screen."],
+    ["cat", "One pixel left and it's yours."],
   ],
   solved: [
-    ["squirrel", "NAILED IT! 🎉 Nuts for you!"],
-    ["cat", "Purrfect. 😼"],
-    ["squirrel", "Knew you had it in you!"],
+    ["squirrel", "FINALLY. I was running out of material. 🎉"],
+    ["cat", "GG. I'll notify the other 8 pixels of me."],
+    ["squirrel", "Nailed it! Tell everyone I helped. (I didn't.)"],
+    ["cat", "Correct. I'm contractually obligated to be impressed."],
   ],
   idle: [
-    ["cat", "I bet it's somewhere with good fish… 🐟"],
-    ["squirrel", "My money's on somewhere with trees. 🌳"],
-    ["cat", "Spinning the globe makes me dizzy. 🌀"],
-    ["squirrel", "Is it nap o'clock yet?"],
-    ["cat", "Psst… try a country you forgot exists."],
+    ["cat", "I orbit all day so you can sit there. You're welcome."],
+    ["squirrel", "Fun fact: I'm a PNG having an existential crisis."],
+    ["cat", "These rockets keep photobombing my orbit. 🚀"],
+    ["squirrel", "Is it nap o'clock? It's always nap o'clock."],
+    ["cat", "Psst. The answer's a country. Narrowed it down for ya."],
+    ["squirrel", "I've seen every guess. I have notes."],
   ],
 };
 /* The cat & squirrel orbit the globe (see addOrbiters). When they have something
- * to say, a small transient toast pops in the corner with the speaker + line. */
-let mascotTimer, mascotIdleAt = 0;
+ * to say, a speech bubble follows whichever one is talking around the globe. */
+const orbiterSprites = {};   // { cat: Sprite, squirrel: Sprite }
+let mascotTimer, mascotIdleAt = 0, speechSpeaker = null;
+const _projV = new Vector3();
 function sayMascot(text, who) {
   if (ui.inputBar.hidden) return; // only during play
-  ui.mascotImg.src = MASCOT[who] || MASCOT.cat;
   ui.mascotBubble.textContent = text;
-  ui.mascotBubble.hidden = false;
+  speechSpeaker = orbiterSprites[who] || orbiterSprites.cat || null;
   ui.mascot.hidden = false;
+  updateSpeechPosition();
   mascotIdleAt = Date.now();
   clearTimeout(mascotTimer);
-  mascotTimer = setTimeout(() => { ui.mascotBubble.hidden = true; ui.mascot.hidden = true; }, 4200);
+  mascotTimer = setTimeout(() => { ui.mascot.hidden = true; speechSpeaker = null; }, 5000);
+}
+function updateSpeechPosition() {
+  if (ui.mascot.hidden || !speechSpeaker || !globe) return;
+  speechSpeaker.getWorldPosition(_projV).project(globe.camera());
+  ui.mascot.style.left = (_projV.x * 0.5 + 0.5) * window.innerWidth + "px";
+  ui.mascot.style.top = (-_projV.y * 0.5 + 0.5) * window.innerHeight + "px";
 }
 function sayFrom(bucket) {
   const arr = LINES[bucket]; const [who, text] = arr[Math.floor(Math.random() * arr.length)];

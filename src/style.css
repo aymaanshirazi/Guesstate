@@ -540,11 +540,14 @@ body.is-hard .fi-arrow { display: none; }
   padding: 30px 18px 22px;
   overflow-y: auto;
   background: linear-gradient(180deg,
-    rgba(5,6,12,0.78) 0%, rgba(5,6,12,0.2) 24%, transparent 42%,
-    transparent 52%, rgba(5,6,12,0.4) 74%, rgba(5,6,12,0.9) 100%);
+    rgba(5,6,12,0.82) 0%, rgba(5,6,12,0.28) 24%, transparent 42%,
+    transparent 52%, rgba(5,6,12,0.5) 74%, rgba(5,6,12,0.92) 100%);
   animation: fade 0.5s ease;
+  /* let drags in the empty middle reach the globe so it's spinnable */
+  pointer-events: none;
 }
 .menu-top { flex: none; text-align: center; animation: riseIn 0.5s ease both; }
+.menu-bottom, .big-card, .diff-inline, .menu-foot, .menu-credit, #menuStep2 { pointer-events: auto; }
 .menu-hint {
   margin-top: 14px;
   font-family: "JetBrains Mono", monospace;
@@ -584,7 +587,10 @@ body.is-hard .fi-arrow { display: none; }
   gap: 14px;
   text-align: left;
   border: 1px solid var(--panel-brd);
-  background: rgba(0, 0, 0, 0.26);
+  background: rgba(10, 13, 22, 0.78);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-1);
   color: var(--txt);
   padding: 16px;
   border-radius: 15px;
@@ -598,13 +604,13 @@ body.is-hard .fi-arrow { display: none; }
 .bc-title { font-weight: 700; font-size: 16.5px; letter-spacing: 0.3px; }
 .bc-sub { font-size: 12px; color: var(--txt-dim); margin-top: 2px; }
 .bc-go { color: var(--txt-dim); font-size: 14px; flex: none; }
-#cardDaily { background: linear-gradient(100deg, rgba(255,207,92,0.13), rgba(255,138,60,0.08)); border-color: rgba(255,207,92,0.3); }
+#cardDaily { background: linear-gradient(100deg, rgba(255,207,92,0.18), rgba(255,138,60,0.1)), rgba(10,13,22,0.8); border-color: rgba(255,207,92,0.3); }
 #cardDaily:hover { border-color: var(--warn); box-shadow: 0 0 28px -8px var(--warn); }
 #cardDaily .bc-title { color: var(--warn); }
-#cardFriends { background: linear-gradient(100deg, rgba(0,224,198,0.13), rgba(77,124,255,0.08)); border-color: rgba(0,224,198,0.3); }
+#cardFriends { background: linear-gradient(100deg, rgba(0,224,198,0.18), rgba(77,124,255,0.1)), rgba(10,13,22,0.8); border-color: rgba(0,224,198,0.3); }
 #cardFriends:hover { border-color: var(--accent-2); box-shadow: 0 0 28px -8px var(--accent-2); }
 #cardFriends .bc-title { color: var(--accent-2); }
-#cardFree { background: linear-gradient(100deg, rgba(77,124,255,0.14), rgba(120,90,255,0.08)); border-color: rgba(77,124,255,0.32); }
+#cardFree { background: linear-gradient(100deg, rgba(77,124,255,0.2), rgba(120,90,255,0.1)), rgba(10,13,22,0.8); border-color: rgba(77,124,255,0.32); }
 #cardFree:hover { border-color: var(--accent); box-shadow: 0 0 28px -8px var(--accent); }
 #cardFree .bc-title { color: #9db4ff; }
 
@@ -992,41 +998,36 @@ body.is-hard .fi-arrow { display: none; }
 /* ---------- mascot ---------- */
 .mascot {
   position: fixed;
-  left: 14px;
-  bottom: 150px;
-  z-index: 3;
-  width: 72px;
+  left: 0; top: 0;
+  z-index: 4;
   pointer-events: none;
-  animation: floaty 4s ease-in-out infinite;
+  transform: translate(-50%, calc(-100% - 20px));
+  transition: opacity 0.25s ease;
 }
-.mascot-img { width: 72px; height: auto; display: block; filter: drop-shadow(0 6px 14px rgba(0,0,0,0.5)); }
-@keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
 .mascot-bubble {
-  position: absolute;
-  left: 56px;
-  bottom: 44px;
-  min-width: 120px;
-  max-width: 200px;
-  background: var(--panel);
+  position: relative;
+  min-width: 90px;
+  max-width: 210px;
+  text-align: center;
+  background: rgba(10, 14, 26, 0.94);
   border: 1px solid var(--panel-brd);
   box-shadow: var(--shadow-1);
   color: var(--txt);
   font-size: 13px;
   line-height: 1.35;
-  padding: 9px 12px;
-  border-radius: 13px;
-  border-bottom-left-radius: 3px;
-  backdrop-filter: blur(10px);
+  padding: 9px 13px;
+  border-radius: 14px;
   animation: pop 0.2s ease both;
 }
 .mascot-bubble::after {
   content: "";
   position: absolute;
-  left: -7px; bottom: 8px;
-  border: 6px solid transparent;
-  border-right-color: var(--panel-brd);
+  left: 50%; bottom: -7px;
+  transform: translateX(-50%);
+  border: 7px solid transparent;
+  border-top-color: rgba(10, 14, 26, 0.94);
 }
-@media (max-width: 720px) { .mascot { width: 58px; bottom: 200px; left: 8px; } .mascot-img { width: 58px; } .mascot-bubble { left: 46px; max-width: 160px; font-size: 12px; } }
+@media (max-width: 720px) { .mascot-bubble { max-width: 170px; font-size: 12px; } }
 
 /* ---------- music player ---------- */
 .music-panel {

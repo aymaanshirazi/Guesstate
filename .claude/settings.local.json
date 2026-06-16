@@ -39,7 +39,8 @@
       "Bash(npx partykit *)",
       "Bash(git commit -q -m 'Multiplayer Phase 3: point production at deployed PartyKit host \\(multiplayer now live\\) *)",
       "Bash(node scripts/test-mp.mjs guesstate.aymaanshirazi.partykit.dev)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(timeout 120 npx --yes netlify-cli@latest status)"
     ]
   }
 }
