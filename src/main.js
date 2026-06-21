@@ -321,7 +321,7 @@ function showMenu() {
   ui.cardFriends.hidden = !MULTIPLAYER_ENABLED;
   ui.menuStep1.hidden = false;
   ui.menuStep2.hidden = true;
-  if (globe) { render(); controls.autoRotate = true; controls.autoRotateSpeed = 0.7; globe.pointOfView({ altitude: 2.3 }, 1100); }
+  if (globe) { render(); controls.autoRotate = true; controls.autoRotateSpeed = 1.6; globe.pointOfView({ altitude: 2.3 }, 1100); }
   ui.topBar.hidden = true;
   ui.inputBar.hidden = true;
   ui.closestPanel.hidden = true;
@@ -719,8 +719,8 @@ function addOrbiters() {
   orbiterSprites.cat = makeImageSprite("/cat-astronaut.svg");
   orbiterSprites.squirrel = makeImageSprite("/squirrel-astronaut.svg");
   const items = [
-    { sp: orbiterSprites.cat, s: 17 },
-    { sp: orbiterSprites.squirrel, s: 18 },
+    { sp: orbiterSprites.cat, s: 12 },
+    { sp: orbiterSprites.squirrel, s: 12.5 },
     { sp: makeEmojiSprite("🚀"), s: 11 },
     { sp: makeEmojiSprite("🛸"), s: 11 },
     { sp: makeEmojiSprite("🪐"), s: 12 },
@@ -961,7 +961,7 @@ const orbiterSprites = {};   // { cat: Sprite, squirrel: Sprite }
 let mascotTimer, mascotIdleAt = 0, speechSpeaker = null;
 const _projV = new Vector3();
 function sayMascot(text, who) {
-  if (ui.inputBar.hidden) return; // only during play
+  if (ui.inputBar.hidden && ui.menu.hidden) return; // only on the menu or during play
   ui.mascotBubble.textContent = text;
   speechSpeaker = orbiterSprites[who] || orbiterSprites.cat || null;
   ui.mascot.hidden = false;
@@ -972,9 +972,19 @@ function sayMascot(text, who) {
 }
 function updateSpeechPosition() {
   if (ui.mascot.hidden || !speechSpeaker || !globe) return;
-  speechSpeaker.getWorldPosition(_projV).project(globe.camera());
-  ui.mascot.style.left = (_projV.x * 0.5 + 0.5) * window.innerWidth + "px";
-  ui.mascot.style.top = (-_projV.y * 0.5 + 0.5) * window.innerHeight + "px";
+  const cam = globe.camera();
+  if (!cam) return;
+  speechSpeaker.getWorldPosition(_projV).project(cam);
+  let x = (_projV.x * 0.5 + 0.5) * window.innerWidth;
+  let y = (-_projV.y * 0.5 + 0.5) * window.innerHeight;
+  if (!isFinite(x)) x = window.innerWidth / 2;
+  if (!isFinite(y)) y = window.innerHeight / 2;
+  if (_projV.z > 1) x = window.innerWidth - x; // behind camera: mirror so it stays sensible
+  // keep the bubble on-screen, clear of the top panels and the input bar
+  x = Math.max(80, Math.min(window.innerWidth - 80, x));
+  y = Math.max(220, Math.min(window.innerHeight - 180, y));
+  ui.mascot.style.left = x + "px";
+  ui.mascot.style.top = y + "px";
 }
 function sayFrom(bucket) {
   const arr = LINES[bucket]; const [who, text] = arr[Math.floor(Math.random() * arr.length)];
@@ -987,98 +997,98 @@ function reactToGuess(p, solved) {
   else sayFrom("close");
 }
 setInterval(() => {
-  if (!ui.inputBar.hidden && Date.now() - mascotIdleAt > 18000) sayFrom("idle");
-}, 6000);
+  const active = !ui.inputBar.hidden || !ui.menu.hidden;
+  if (active && Date.now() - mascotIdleAt > 14000) sayFrom("idle");
+}, 5000);
 
-/* ---------------- background music (generated in-browser, copyright-free) ---------------- */
-const lofi = {
-  ctx: null, master: null, filter: null, playing: false, mood: 0, bar: 0, timer: null, nextTime: 0,
-  moods: [
-    { name: "Lo-fi Chill", bpm: 72, cutoff: 1200, chords: [[60, 64, 67, 71], [57, 60, 64, 67], [62, 65, 69, 72], [55, 59, 62, 65]] },
-    { name: "Sleepy", bpm: 58, cutoff: 820, chords: [[57, 60, 64], [53, 57, 60], [55, 59, 62], [52, 55, 59]] },
-    { name: "Focus", bpm: 84, cutoff: 1500, chords: [[60, 63, 67], [58, 62, 65], [56, 60, 63], [55, 59, 62]] },
-  ],
+/* ---------------- ambient soundscape (generated in-browser) ----------------
+ * HALAL by design: NO musical instruments, melodies, or chords — only natural
+ * ambience (rain, ocean, wind) synthesised from filtered noise. Not "music",
+ * just background sound. Copyright-free (we generate it). */
+const ambient = {
+  ctx: null, master: null, playing: false, mood: 0, sources: [], lfos: [], dropTimer: null,
+  moods: ["Rain ☔", "Ocean 🌊", "Night wind 🌌"],
   init() {
     const AC = window.AudioContext || window.webkitAudioContext;
     this.ctx = new AC();
     this.master = this.ctx.createGain();
-    this.filter = this.ctx.createBiquadFilter();
-    this.filter.type = "lowpass";
-    this.filter.frequency.value = this.moods[this.mood].cutoff;
-    this.filter.connect(this.master);
     this.master.connect(this.ctx.destination);
-    this.crackle();
   },
-  crackle() { // soft vinyl hiss
-    const len = this.ctx.sampleRate * 2, buf = this.ctx.createBuffer(1, len, this.ctx.sampleRate), d = buf.getChannelData(0);
-    for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (Math.random() < 0.0007 ? 1 : 0.04);
-    const s = this.ctx.createBufferSource(); s.buffer = buf; s.loop = true;
-    const hp = this.ctx.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 2200;
-    const g = this.ctx.createGain(); g.gain.value = 0.05;
-    s.connect(hp); hp.connect(g); g.connect(this.master); s.start();
+  noise(sec = 3) { // smoothed (brownish) noise buffer, looping
+    const len = this.ctx.sampleRate * sec, buf = this.ctx.createBuffer(1, len, this.ctx.sampleRate), d = buf.getChannelData(0);
+    let last = 0;
+    for (let i = 0; i < len; i++) { const w = Math.random() * 2 - 1; last = (last + 0.02 * w) / 1.02; d[i] = last * 3.2; }
+    const s = this.ctx.createBufferSource(); s.buffer = buf; s.loop = true; return s;
   },
-  freq: (m) => 440 * Math.pow(2, (m - 69) / 12),
-  voice(m, t, dur, type, gain) {
-    const o = this.ctx.createOscillator(), g = this.ctx.createGain();
-    o.type = type; o.frequency.value = this.freq(m);
-    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(gain, t + 0.1); g.gain.linearRampToValueAtTime(0, t + dur);
-    o.connect(g); g.connect(this.filter); o.start(t); o.stop(t + dur + 0.05);
+  lfo(rate, depth, target) {
+    const o = this.ctx.createOscillator(); o.frequency.value = rate;
+    const g = this.ctx.createGain(); g.gain.value = depth;
+    o.connect(g); g.connect(target); o.start(); this.lfos.push(o);
   },
-  kick(t) {
-    const o = this.ctx.createOscillator(), g = this.ctx.createGain();
-    o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(45, t + 0.12);
-    g.gain.setValueAtTime(0.5, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
-    o.connect(g); g.connect(this.master); o.start(t); o.stop(t + 0.2);
+  build() {
+    this.teardown();
+    const ctx = this.ctx, out = this.master;
+    const src = this.noise(); this.sources.push(src);
+    if (this.mood === 0) {                 // Rain
+      const hp = ctx.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 900;
+      const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 8500;
+      const g = ctx.createGain(); g.gain.value = 0.55;
+      src.connect(hp); hp.connect(lp); lp.connect(g); g.connect(out); src.start();
+      this.dropTimer = setInterval(() => {  // occasional droplets
+        if (!this.playing) return;
+        const b = this.noise(0.06), f = ctx.createBiquadFilter(); f.type = "bandpass"; f.frequency.value = 2200 + Math.random() * 4500; f.Q.value = 3;
+        const dg = ctx.createGain(), t = ctx.currentTime;
+        dg.gain.setValueAtTime(0, t); dg.gain.linearRampToValueAtTime(0.12, t + 0.004); dg.gain.exponentialRampToValueAtTime(0.001, t + 0.09);
+        b.connect(f); f.connect(dg); dg.connect(out); b.start(t); b.stop(t + 0.12);
+      }, 85);
+    } else if (this.mood === 1) {          // Ocean
+      const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 600;
+      const g = ctx.createGain(); g.gain.value = 0.42;
+      src.connect(lp); lp.connect(g); g.connect(out); src.start();
+      this.lfo(0.08, 0.26, g.gain);        // wave swell (volume)
+      this.lfo(0.08, 380, lp.frequency);   // wave swell (brightness)
+    } else {                               // Night wind
+      const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 480;
+      const g = ctx.createGain(); g.gain.value = 0.34;
+      src.connect(lp); lp.connect(g); g.connect(out); src.start();
+      this.lfo(0.05, 300, lp.frequency);
+      this.lfo(0.03, 0.12, g.gain);
+    }
   },
-  hat(t) {
-    const len = this.ctx.sampleRate * 0.05, buf = this.ctx.createBuffer(1, len, this.ctx.sampleRate), d = buf.getChannelData(0);
-    for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
-    const s = this.ctx.createBufferSource(); s.buffer = buf;
-    const hp = this.ctx.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 7000;
-    const g = this.ctx.createGain(); g.gain.setValueAtTime(0.07, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
-    s.connect(hp); hp.connect(g); g.connect(this.master); s.start(t);
+  teardown() {
+    clearInterval(this.dropTimer);
+    this.sources.forEach((s) => { try { s.stop(); } catch {} });
+    this.lfos.forEach((l) => { try { l.stop(); } catch {} });
+    this.sources = []; this.lfos = [];
   },
-  scheduleBar(t) {
-    const m = this.moods[this.mood], chord = m.chords[this.bar % m.chords.length];
-    const beat = 60 / m.bpm, bar = beat * 4;
-    chord.forEach((n) => this.voice(n, t, bar * 0.96, "triangle", 0.09));   // pad
-    this.voice(chord[0] - 12, t, bar * 0.9, "sine", 0.16);                  // bass
-    this.kick(t); this.kick(t + beat * 2);                                  // kick 1 & 3
-    this.hat(t + beat); this.hat(t + beat * 3);                             // hat 2 & 4
-    this.bar++;
-    return bar;
-  },
-  loop() { while (this.nextTime < this.ctx.currentTime + 0.4) this.nextTime += this.scheduleBar(this.nextTime); },
   start() {
     if (!this.ctx) this.init();
     if (this.ctx.state === "suspended") this.ctx.resume();
     if (this.playing) return;
-    this.playing = true;
-    this.nextTime = this.ctx.currentTime + 0.1;
-    this.timer = setInterval(() => this.loop(), 60);
+    this.playing = true; this.build();
   },
-  stop() { this.playing = false; clearInterval(this.timer); },
+  stop() { this.playing = false; this.teardown(); },
   setVol(v) { if (this.master) this.master.gain.value = v; },
-  setMood(i) { this.mood = i; this.bar = 0; if (this.filter) this.filter.frequency.value = this.moods[i].cutoff; },
+  setMood(i) { this.mood = i; if (this.playing) this.build(); },
 };
 
 function initMusic() {
-  ui.musicBtn.hidden = false; // generated music is always available, no files needed
-  ui.musicSelect.innerHTML = lofi.moods.map((m, i) => `<option value="${i}">${esc(m.name)}</option>`).join("");
+  ui.musicBtn.hidden = false; // generated ambience is always available, no files needed
+  ui.musicSelect.innerHTML = ambient.moods.map((m, i) => `<option value="${i}">${esc(m)}</option>`).join("");
   const vol = parseFloat(localStorage.getItem("guesstate_music_vol"));
-  const v = isNaN(vol) ? 0.45 : vol;
-  ui.musicVol.value = v; lofi.setVol(v);
-  const mood = Math.min(lofi.moods.length - 1, parseInt(localStorage.getItem("guesstate_music_mood") || "0", 10));
-  lofi.setMood(mood); ui.musicSelect.value = String(mood); ui.musicNow.textContent = lofi.moods[mood].name;
+  const v = isNaN(vol) ? 0.5 : vol;
+  ui.musicVol.value = v; ambient.setVol(v);
+  const mood = Math.min(ambient.moods.length - 1, parseInt(localStorage.getItem("guesstate_music_mood") || "0", 10));
+  ambient.setMood(mood); ui.musicSelect.value = String(mood); ui.musicNow.textContent = ambient.moods[mood];
 
   ui.musicBtn.addEventListener("click", () => { ui.musicPanel.hidden = !ui.musicPanel.hidden; });
   ui.musicToggle.addEventListener("click", () => {
-    if (lofi.playing) { lofi.stop(); ui.musicToggle.textContent = "▶"; }
-    else { lofi.setVol(+ui.musicVol.value); lofi.start(); ui.musicToggle.textContent = "⏸"; }
+    if (ambient.playing) { ambient.stop(); ui.musicToggle.textContent = "▶"; }
+    else { ambient.setVol(+ui.musicVol.value); ambient.start(); ui.musicToggle.textContent = "⏸"; }
   });
-  ui.musicVol.addEventListener("input", () => { lofi.setVol(+ui.musicVol.value); localStorage.setItem("guesstate_music_vol", ui.musicVol.value); });
+  ui.musicVol.addEventListener("input", () => { ambient.setVol(+ui.musicVol.value); localStorage.setItem("guesstate_music_vol", ui.musicVol.value); });
   ui.musicSelect.addEventListener("change", () => {
-    lofi.setMood(+ui.musicSelect.value); ui.musicNow.textContent = lofi.moods[+ui.musicSelect.value].name;
+    ambient.setMood(+ui.musicSelect.value); ui.musicNow.textContent = ambient.moods[+ui.musicSelect.value];
     localStorage.setItem("guesstate_music_mood", ui.musicSelect.value);
   });
 }
