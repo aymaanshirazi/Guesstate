@@ -321,7 +321,7 @@ function showMenu() {
   ui.cardFriends.hidden = !MULTIPLAYER_ENABLED;
   ui.menuStep1.hidden = false;
   ui.menuStep2.hidden = true;
-  if (globe) { render(); controls.autoRotate = true; controls.autoRotateSpeed = 1.6; globe.pointOfView({ altitude: 2.3 }, 1100); }
+  if (globe) { render(); controls.autoRotate = true; controls.autoRotateSpeed = 3.2; globe.pointOfView({ altitude: 2.3 }, 1100); }
   ui.topBar.hidden = true;
   ui.inputBar.hidden = true;
   ui.closestPanel.hidden = true;
@@ -719,8 +719,8 @@ function addOrbiters() {
   orbiterSprites.cat = makeImageSprite("/cat-astronaut.svg");
   orbiterSprites.squirrel = makeImageSprite("/squirrel-astronaut.svg");
   const items = [
-    { sp: orbiterSprites.cat, s: 12 },
-    { sp: orbiterSprites.squirrel, s: 12.5 },
+    { sp: orbiterSprites.cat, s: 9 },
+    { sp: orbiterSprites.squirrel, s: 9.5 },
     { sp: makeEmojiSprite("🚀"), s: 11 },
     { sp: makeEmojiSprite("🛸"), s: 11 },
     { sp: makeEmojiSprite("🪐"), s: 12 },
@@ -964,6 +964,7 @@ function sayMascot(text, who) {
   if (ui.inputBar.hidden && ui.menu.hidden) return; // only on the menu or during play
   ui.mascotBubble.textContent = text;
   speechSpeaker = orbiterSprites[who] || orbiterSprites.cat || null;
+  ui.mascotBubble.hidden = false;
   ui.mascot.hidden = false;
   updateSpeechPosition();
   mascotIdleAt = Date.now();
