@@ -917,16 +917,12 @@ const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&l
 const orbiterSprites = {};   // { cat: Sprite, squirrel: Sprite }
 
 /* ---------------- ambient soundscape (generated in-browser) ----------------
- * HALAL by design: only natural ambience (rain, ocean, wind) plus an optional
- * DUFF (frame-drum) beat — all synthesised in-browser from filtered noise and a
- * single percussive membrane tone. NO melodic instruments, no strings/keys/wind
- * instruments, no chords or melodies. The duff/daff is widely held permissible.
- * Everything is generated, so it's fully copyright-free. */
+ * HALAL by design: NO musical instruments, melodies, or chords — only natural
+ * ambience (rain, ocean, wind) synthesised from filtered noise. Not "music",
+ * just background sound. Copyright-free (we generate it). */
 const ambient = {
   ctx: null, master: null, playing: false, mood: 0, sources: [], lfos: [], dropTimer: null,
-  beatTimer: null, beatStep: 0, nextNoteTime: 0, beatDur: 0.4, beatPattern: null,
-  // 0-2: pure nature.  3-4: lo-fi chill with a soft duff beat.
-  moods: ["Lo-fi chill 🎧", "Lo-fi rain 🌧️", "Rain ☔", "Ocean 🌊", "Night wind 🌌"],
+  moods: ["Rain ☔", "Ocean 🌊", "Night wind 🌌"],
   init() {
     const AC = window.AudioContext || window.webkitAudioContext;
     this.ctx = new AC();
@@ -944,94 +940,29 @@ const ambient = {
     const g = this.ctx.createGain(); g.gain.value = depth;
     o.connect(g); g.connect(target); o.start(); this.lfos.push(o);
   },
-  // --- duff (frame drum) hits, synthesised from a membrane tone + noise ---
-  duffDum(t) {                              // low "dum" — centre of the drum
-    const ctx = this.ctx, out = this.master;
-    const o = ctx.createOscillator(); o.type = "sine";
-    o.frequency.setValueAtTime(115, t); o.frequency.exponentialRampToValueAtTime(48, t + 0.18);
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(0.6, t + 0.008);
-    g.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
-    o.connect(g); g.connect(out); o.start(t); o.stop(t + 0.45);
-    const b = this.noise(0.05), f = ctx.createBiquadFilter(); f.type = "lowpass"; f.frequency.value = 200;
-    const ng = ctx.createGain();
-    ng.gain.setValueAtTime(0.22, t); ng.gain.exponentialRampToValueAtTime(0.001, t + 0.06);
-    b.connect(f); f.connect(ng); ng.connect(out); b.start(t); b.stop(t + 0.08);
-  },
-  duffTak(t, vol = 0.3) {                   // higher "tak" — rim of the drum
-    const ctx = this.ctx, out = this.master;
-    const b = this.noise(0.05), f = ctx.createBiquadFilter(); f.type = "bandpass"; f.frequency.value = 1850; f.Q.value = 1.5;
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.004); g.gain.exponentialRampToValueAtTime(0.001, t + 0.09);
-    b.connect(f); f.connect(g); g.connect(out); b.start(t); b.stop(t + 0.12);
-  },
-  startBeat() {                             // relaxed half-time lo-fi groove (~74 BPM)
-    this.beatDur = 0.405;                   // eighth-note grid
-    this.beatPattern = [1, 0, 0, 3, 2, 0, 1, 0]; // 1=dum  2=tak  3=ghost tak
-    this.beatStep = 0;
-    this.nextNoteTime = this.ctx.currentTime + 0.12;
-    this.beatTimer = setInterval(() => {    // lookahead scheduler for tight timing
-      if (!this.playing) return;
-      while (this.nextNoteTime < this.ctx.currentTime + 0.18) {
-        const hit = this.beatPattern[this.beatStep % this.beatPattern.length];
-        const swing = (this.beatStep % 2) ? 0.02 : 0;               // light swing
-        const t = this.nextNoteTime + swing + Math.random() * 0.006; // human feel
-        if (hit === 1) this.duffDum(t);
-        else if (hit === 2) this.duffTak(t);
-        else if (hit === 3) this.duffTak(t, 0.12);
-        this.beatStep++;
-        this.nextNoteTime += this.beatDur;
-      }
-    }, 40);
-  },
-  rainBed(level = 0.42) {
-    const ctx = this.ctx, out = this.master;
-    const src = this.noise(); this.sources.push(src);
-    const hp = ctx.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 900;
-    const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 8500;
-    const g = ctx.createGain(); g.gain.value = level;
-    src.connect(hp); hp.connect(lp); lp.connect(g); g.connect(out); src.start();
-    this.dropTimer = setInterval(() => {    // occasional droplets
-      if (!this.playing) return;
-      const b = this.noise(0.06), f = ctx.createBiquadFilter(); f.type = "bandpass"; f.frequency.value = 2200 + Math.random() * 4500; f.Q.value = 3;
-      const dg = ctx.createGain(), t = ctx.currentTime;
-      dg.gain.setValueAtTime(0, t); dg.gain.linearRampToValueAtTime(0.1, t + 0.004); dg.gain.exponentialRampToValueAtTime(0.001, t + 0.09);
-      b.connect(f); f.connect(dg); dg.connect(out); b.start(t); b.stop(t + 0.12);
-    }, 85);
-  },
-  vinylBed() {                              // warm hiss + vinyl crackle (just noise)
-    const ctx = this.ctx, out = this.master;
-    const src = this.noise(); this.sources.push(src);
-    const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 2600;
-    const g = ctx.createGain(); g.gain.value = 0.12;
-    src.connect(lp); lp.connect(g); g.connect(out); src.start();
-    this.dropTimer = setInterval(() => {    // sparse crackle pops
-      if (!this.playing) return;
-      const b = this.noise(0.03), f = ctx.createBiquadFilter(); f.type = "highpass"; f.frequency.value = 3000;
-      const cg = ctx.createGain(), t = ctx.currentTime;
-      cg.gain.setValueAtTime(0, t); cg.gain.linearRampToValueAtTime(0.05 + Math.random() * 0.06, t + 0.002); cg.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
-      b.connect(f); f.connect(cg); cg.connect(out); b.start(t); b.stop(t + 0.05);
-    }, 60);
-  },
   build() {
     this.teardown();
     const ctx = this.ctx, out = this.master;
-    if (this.mood === 0) {                  // Lo-fi chill: vinyl warmth + duff beat
-      this.vinylBed(); this.startBeat();
-    } else if (this.mood === 1) {           // Lo-fi rain: rain + duff beat
-      this.rainBed(0.34); this.startBeat();
-    } else if (this.mood === 2) {           // Rain
-      this.rainBed(0.55);
-    } else if (this.mood === 3) {           // Ocean
-      const src = this.noise(); this.sources.push(src);
+    const src = this.noise(); this.sources.push(src);
+    if (this.mood === 0) {                 // Rain
+      const hp = ctx.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 900;
+      const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 8500;
+      const g = ctx.createGain(); g.gain.value = 0.55;
+      src.connect(hp); hp.connect(lp); lp.connect(g); g.connect(out); src.start();
+      this.dropTimer = setInterval(() => {  // occasional droplets
+        if (!this.playing) return;
+        const b = this.noise(0.06), f = ctx.createBiquadFilter(); f.type = "bandpass"; f.frequency.value = 2200 + Math.random() * 4500; f.Q.value = 3;
+        const dg = ctx.createGain(), t = ctx.currentTime;
+        dg.gain.setValueAtTime(0, t); dg.gain.linearRampToValueAtTime(0.12, t + 0.004); dg.gain.exponentialRampToValueAtTime(0.001, t + 0.09);
+        b.connect(f); f.connect(dg); dg.connect(out); b.start(t); b.stop(t + 0.12);
+      }, 85);
+    } else if (this.mood === 1) {          // Ocean
       const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 600;
       const g = ctx.createGain(); g.gain.value = 0.42;
       src.connect(lp); lp.connect(g); g.connect(out); src.start();
-      this.lfo(0.08, 0.26, g.gain);         // wave swell (volume)
-      this.lfo(0.08, 380, lp.frequency);    // wave swell (brightness)
-    } else {                                // Night wind
-      const src = this.noise(); this.sources.push(src);
+      this.lfo(0.08, 0.26, g.gain);        // wave swell (volume)
+      this.lfo(0.08, 380, lp.frequency);   // wave swell (brightness)
+    } else {                               // Night wind
       const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 480;
       const g = ctx.createGain(); g.gain.value = 0.34;
       src.connect(lp); lp.connect(g); g.connect(out); src.start();
@@ -1041,7 +972,6 @@ const ambient = {
   },
   teardown() {
     clearInterval(this.dropTimer);
-    clearInterval(this.beatTimer);
     this.sources.forEach((s) => { try { s.stop(); } catch {} });
     this.lfos.forEach((l) => { try { l.stop(); } catch {} });
     this.sources = []; this.lfos = [];
