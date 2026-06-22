@@ -27,6 +27,7 @@
     <meta property="og:image" content="https://guesstate.com/og.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Guesstate — guess the country or city on a 3D globe" />
 
     <!-- Twitter / X -->
     <meta name="twitter:card" content="summary_large_image" />
@@ -38,13 +39,59 @@
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "WebApplication",
-      "name": "Guesstate",
-      "url": "https://guesstate.com/",
-      "description": "A free daily geography guessing game. Find the secret country or city on an interactive 3D globe — every guess shows how close you are.",
-      "applicationCategory": "GameApplication",
-      "operatingSystem": "Any (web browser)",
-      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://guesstate.com/#website",
+          "name": "Guesstate",
+          "alternateName": "Guess State",
+          "url": "https://guesstate.com/",
+          "description": "A free daily geography guessing game on an interactive 3D globe."
+        },
+        {
+          "@type": "Organization",
+          "@id": "https://guesstate.com/#org",
+          "name": "Guesstate",
+          "url": "https://guesstate.com/",
+          "logo": "https://guesstate.com/og.png"
+        },
+        {
+          "@type": "WebApplication",
+          "name": "Guesstate",
+          "url": "https://guesstate.com/",
+          "description": "A free daily geography guessing game. Find the secret country or city on an interactive 3D globe — every guess shows how close you are.",
+          "applicationCategory": "GameApplication",
+          "operatingSystem": "Any (web browser)",
+          "browserRequirements": "Requires JavaScript and WebGL",
+          "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+          "publisher": { "@id": "https://guesstate.com/#org" }
+        },
+        {
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "What is Guesstate?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Guesstate is a free daily geography game where you guess the hidden country or city on an interactive 3D globe. Every guess reveals how close you are until you find the secret location." }
+            },
+            {
+              "@type": "Question",
+              "name": "Is Guesstate free to play?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Yes. Guesstate is free to play in the browser. There is one optional one-time unlock for Cities mode, but the daily challenge and Free Play countries mode are free." }
+            },
+            {
+              "@type": "Question",
+              "name": "How do you play Guesstate?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Type the name of a country or city and the globe shows the distance — and in Easy mode the direction — to the secret place. Keep guessing closer until you solve it, then share your score." }
+            },
+            {
+              "@type": "Question",
+              "name": "Is there a new Guesstate puzzle every day?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Yes. The Daily Challenge is the same shared puzzle for everyone each day, so you can compare scores with friends. You can also play unlimited Free Play rounds any time." }
+            }
+          ]
+        }
+      ]
     }
     </script>
 
@@ -225,7 +272,7 @@
     <div class="menu-overlay mp-overlay" id="mpSetup" hidden>
       <div class="menu-card">
         <button class="unlock-close" id="mpSetupClose">✕</button>
-        <div class="menu-brand"><span class="menu-mark">👥</span><h1 class="menu-title" style="font-size:26px;letter-spacing:4px">FRIENDS</h1></div>
+        <div class="menu-brand"><span class="menu-mark">👥</span><h2 class="menu-title" style="font-size:26px;letter-spacing:4px">FRIENDS</h2></div>
         <p class="menu-tagline">Everyone races to guess the same secret country. See who's <b>closest</b> and who solves it in the fewest tries.</p>
         <div class="menu-section">
           <div class="menu-label">Your name</div>
