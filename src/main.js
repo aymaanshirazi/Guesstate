@@ -1,5 +1,5 @@
 import Globe from "globe.gl";
-import { Color, Group, Sprite, SpriteMaterial, CanvasTexture, Vector3 } from "three";
+import { Color, Group, Sprite, SpriteMaterial, CanvasTexture } from "three";
 import { geoCentroid } from "d3-geo";
 import "./style.css";
 import { ALIASES } from "./aliases.js";
@@ -190,7 +190,6 @@ function applyGuess(country, km, brng = null) {
   updateClosest();
   if (!state.online) ui.feedPanel.hidden = false;
   ui.closestPanel.hidden = false;
-  reactToGuess(p, km === 0);
 }
 
 function commitGuess(country) {
@@ -735,7 +734,7 @@ function addOrbiters() {
     group.add(sp);
   });
   scene.add(group);
-  const tick = () => { group.rotation.y += 0.0011; updateSpeechPosition(); requestAnimationFrame(tick); };
+  const tick = () => { group.rotation.y += 0.0011; requestAnimationFrame(tick); };
   tick();
 }
 
@@ -914,93 +913,8 @@ function leaveMp() {
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
-/* ---------------- mascot (hardcoded comical reactions) ---------------- */
-const MASCOT = {
-  cat: "/cat-astronaut.svg",
-  squirrel: "/squirrel-astronaut.svg",
-};
-const LINES = {
-  far: [
-    ["squirrel", "That's nuts. And not the good kind. 🥜"],
-    ["cat", "Colder than the dev's third coffee. ☕"],
-    ["squirrel", "Bold guess. Confidently incorrect."],
-    ["cat", "I'm a cat in a fishbowl and even I know that's wrong."],
-    ["squirrel", "Map? Or magic 8-ball?"],
-    ["cat", "The globe felt that. It's offended now."],
-  ],
-  mid: [
-    ["cat", "Warmer. Don't let it go to your head."],
-    ["squirrel", "Ooh, a flicker of competence! ✨"],
-    ["cat", "Getting toasty. Like my nap spot."],
-    ["squirrel", "The hardcoded 'warmer' line approves."],
-  ],
-  close: [
-    ["squirrel", "SO close my tail's doing the thing! 🐿️"],
-    ["cat", "Hot! The globe is basically blushing."],
-    ["squirrel", "Practically there. Don't lick the screen."],
-    ["cat", "One pixel left and it's yours."],
-  ],
-  solved: [
-    ["squirrel", "FINALLY. I was running out of material. 🎉"],
-    ["cat", "GG. I'll notify the other 8 pixels of me."],
-    ["squirrel", "Nailed it! Tell everyone I helped. (I didn't.)"],
-    ["cat", "Correct. I'm contractually obligated to be impressed."],
-  ],
-  idle: [
-    ["cat", "I orbit all day so you can sit there. You're welcome."],
-    ["squirrel", "Fun fact: I'm a PNG having an existential crisis."],
-    ["cat", "These rockets keep photobombing my orbit. 🚀"],
-    ["squirrel", "Is it nap o'clock? It's always nap o'clock."],
-    ["cat", "Psst. The answer's a country. Narrowed it down for ya."],
-    ["squirrel", "I've seen every guess. I have notes."],
-  ],
-};
-/* The cat & squirrel orbit the globe (see addOrbiters). When they have something
- * to say, a speech bubble follows whichever one is talking around the globe. */
+/* The cat & squirrel just orbit the globe as ambient background (see addOrbiters). */
 const orbiterSprites = {};   // { cat: Sprite, squirrel: Sprite }
-let mascotTimer, mascotIdleAt = 0, speechSpeaker = null;
-const _projV = new Vector3();
-function sayMascot(text, who) {
-  if (ui.inputBar.hidden && ui.menu.hidden) return; // only on the menu or during play
-  ui.mascotBubble.textContent = text;
-  speechSpeaker = orbiterSprites[who] || orbiterSprites.cat || null;
-  ui.mascotBubble.hidden = false;
-  ui.mascot.hidden = false;
-  updateSpeechPosition();
-  mascotIdleAt = Date.now();
-  clearTimeout(mascotTimer);
-  mascotTimer = setTimeout(() => { ui.mascot.hidden = true; speechSpeaker = null; }, 5000);
-}
-function updateSpeechPosition() {
-  if (ui.mascot.hidden || !speechSpeaker || !globe) return;
-  const cam = globe.camera();
-  if (!cam) return;
-  speechSpeaker.getWorldPosition(_projV).project(cam);
-  let x = (_projV.x * 0.5 + 0.5) * window.innerWidth;
-  let y = (-_projV.y * 0.5 + 0.5) * window.innerHeight;
-  if (!isFinite(x)) x = window.innerWidth / 2;
-  if (!isFinite(y)) y = window.innerHeight / 2;
-  if (_projV.z > 1) x = window.innerWidth - x; // behind camera: mirror so it stays sensible
-  // keep the bubble on-screen, clear of the top panels and the input bar
-  x = Math.max(80, Math.min(window.innerWidth - 80, x));
-  y = Math.max(220, Math.min(window.innerHeight - 180, y));
-  ui.mascot.style.left = x + "px";
-  ui.mascot.style.top = y + "px";
-}
-function sayFrom(bucket) {
-  const arr = LINES[bucket]; const [who, text] = arr[Math.floor(Math.random() * arr.length)];
-  sayMascot(text, who);
-}
-function reactToGuess(p, solved) {
-  if (solved) return sayFrom("solved");
-  if (p < 0.34) sayFrom("far");
-  else if (p < 0.7) sayFrom("mid");
-  else sayFrom("close");
-}
-setInterval(() => {
-  const active = !ui.inputBar.hidden || !ui.menu.hidden;
-  if (active && Date.now() - mascotIdleAt > 14000) sayFrom("idle");
-}, 5000);
 
 /* ---------------- ambient soundscape (generated in-browser) ----------------
  * HALAL by design: NO musical instruments, melodies, or chords — only natural
