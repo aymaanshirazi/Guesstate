@@ -1,0 +1,11 @@
+{
+  // Cloudflare Workers static-assets deploy for the Guesstate frontend.
+  // The build step (`npm run build`) produces ./dist; this serves it as a
+  // static site. Multiplayer (PartyKit) is deployed separately via partykit.json.
+  "name": "guesstate",
+  "compatibility_date": "2026-06-22",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application"
+  }
+}
