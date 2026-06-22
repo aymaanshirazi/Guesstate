@@ -40,7 +40,22 @@
       "Bash(git commit -q -m 'Multiplayer Phase 3: point production at deployed PartyKit host \\(multiplayer now live\\) *)",
       "Bash(node scripts/test-mp.mjs guesstate.aymaanshirazi.partykit.dev)",
       "Bash(git commit *)",
-      "Bash(timeout 120 npx --yes netlify-cli@latest status)"
+      "Bash(timeout 120 npx --yes netlify-cli@latest status)",
+      "Bash(ls -la .netlify)",
+      "Bash(which netlify *)",
+      "Bash(curl -sI https://guesstate.com)",
+      "Bash(curl -s https://guesstate.com)",
+      "Bash(nslookup -type=NS guesstate.com)",
+      "Bash(curl -s https://guesstate.aymaanshirazi.workers.dev)",
+      "Bash(curl -sI https://guesstate.aymaanshirazi.workers.dev)",
+      "Bash(nslookup -type=NS guesstate.com 8.8.8.8)",
+      "Bash(curl -sI https://www.guesstate.com)",
+      "Bash(nslookup www.guesstate.com 8.8.8.8)",
+      "Bash(curl -sL https://www.guesstate.com)",
+      "Bash(nslookup www.guesstate.com alexandra.ns.cloudflare.com)",
+      "Bash(nslookup www.guesstate.com 1.1.1.1)",
+      "Bash(curl -sI --resolve www.guesstate.com:443:172.64.80.1 https://www.guesstate.com)",
+      "Bash(curl -sL --resolve www.guesstate.com:443:172.64.80.1 --resolve guesstate.com:443:104.21.0.0 https://www.guesstate.com)"
     ]
   }
 }
