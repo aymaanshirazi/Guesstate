@@ -1037,7 +1037,7 @@ async function boot() {
   ui.unlockBuy.href = KOFI_SHOP_URL;
   ui.proPrice.textContent = PRO_PRICE;
 
-  const res = await fetch("/countries.geojson");
+  const res = await fetch(`${import.meta.env.BASE_URL}countries.geojson`);
   const geo = await res.json();
 
   for (const f of geo.features) {
@@ -1064,7 +1064,7 @@ async function boot() {
   }
 
   // per-country city sets from the real city database (public/cities.json)
-  const citiesData = await (await fetch("/cities.json")).json();
+  const citiesData = await (await fetch(`${import.meta.env.BASE_URL}cities.json`)).json();
   state.cityCountries = Object.keys(citiesData);
   for (const country of state.cityCountries) {
     state.sets["city:" + country] = buildCitySet(country, citiesData[country]);

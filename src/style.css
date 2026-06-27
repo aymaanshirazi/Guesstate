@@ -847,6 +847,24 @@ body.is-hard .fi-arrow { display: none; }
 .coffee-emoji { font-size: 15px; }
 
 /* ---------- multiplayer ---------- */
+/* The setup + lobby reuse .menu-overlay, but unlike the main menu they are real
+   modal dialogs: they must catch clicks (the main menu is intentionally
+   click-through so the globe spins behind it) and sit centered over a dim
+   backdrop. Scoped to .menu-overlay.mp-overlay so the main menu and the
+   .win-overlay results screen are untouched. */
+.menu-overlay.mp-overlay {
+  pointer-events: auto;
+  z-index: 7;
+  display: grid;
+  place-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(2, 3, 8, 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.menu-overlay.mp-overlay .menu-card { pointer-events: auto; width: min(420px, 100%); }
+
 .mp-btn { border-color: rgba(0, 224, 198, 0.35); background: linear-gradient(100deg, rgba(0, 224, 198, 0.14), rgba(77, 124, 255, 0.1)); }
 .mp-btn:hover { border-color: var(--accent-2); box-shadow: 0 0 26px -8px var(--accent-2); }
 .mp-btn .daily-main { color: var(--accent-2); }
